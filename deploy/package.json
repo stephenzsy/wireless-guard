@@ -1,7 +1,7 @@
 {
-  "name": "wireless-guard-common",
+  "name": "wireless-guard-deploy",
   "version": "0.0.1",
-  "description": "Common package for Wireless Guard",
+  "description": "Deploy utils of Wireless Guard",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,7 +12,7 @@
     "type": "git",
     "url": "https://stepzsy.visualstudio.com/DefaultCollection/_git/wireless-guard"
   },
-  "devDependencies": {
-    "typescript": "^1.8.10"
+  "dependencies": {
+    "wireless-guard-common": "^0.0.1"
   }
 }
