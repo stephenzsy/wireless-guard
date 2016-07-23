@@ -1,2 +1,5 @@
 node_modules
-*.js
+common/dist/**/*.js
+common/src/**/*.js
+deploy/dist/**/*.js
+deploy/src/**/*.js
