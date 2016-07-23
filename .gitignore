@@ -5,3 +5,4 @@ common/src/**/*.js
 deploy/dist/**/*
 !deploy/dist/**/*.keep
 deploy/src/**/*.js
+typings

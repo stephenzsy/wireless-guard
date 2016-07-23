@@ -10,5 +10,5 @@ export interface CaConfig {
   emailAddress: string;
 }
 
-const caConfig = AppContext.getConfig<CaConfig>();
+const caConfig = AppContext.getConfig<CaConfig>(null);
 console.log(caConfig);

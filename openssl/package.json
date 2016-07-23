@@ -1,0 +1,11 @@
+{
+  "name": "wireless-guard-openssl",
+  "version": "0.0.1",
+  "description": "Openssl wrapper and utils for Wireless Guard",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}
