@@ -17,16 +17,16 @@ export module AppContext {
             fs.statSync(instanceConfigDir).isDirectory()) ? true : false;
     }
 
-    function getSettingsConfigPath(): ConfigPath {
-        return null;
+    export function getSettingsConfigPath(): ConfigPath {
+        return new ConfigPath(settingsConfigDir);
     }
 
-    function getInstanceConfigPath(): ConfigPath {
-        return null;
+    export function getInstanceConfigPath(): ConfigPath {
+        return new ConfigPath(instanceConfigDir);
     }
 
     export function getConfig<T>(path: ConfigPath): T {
-        return null as T;
+        return path.loadConfig() as T;
     }
 }
 

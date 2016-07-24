@@ -10,7 +10,11 @@ export interface CaConfig {
     emailAddress: string;
 }
 
-var configPath = new ConfigPath();
+if (!AppContext.hasConfig()) {
+    throw "Config not available";
+}
 
-const caConfig = AppContext.getConfig<CaConfig>(configPath);
-console.log(AppContext.hasConfig());
+const caConfigPath = AppContext.getSettingsConfigPath().path("cert", "ca.json");
+
+const caConfig = AppContext.getConfig<CaConfig>(caConfigPath);
+console.log(caConfig);

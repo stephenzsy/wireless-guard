@@ -1,4 +1,5 @@
 "use strict";
+const config_path_1 = require("../config/config-path");
 const fs = require("fs");
 var AppContext;
 (function (AppContext) {
@@ -12,13 +13,15 @@ var AppContext;
     }
     AppContext.hasConfig = hasConfig;
     function getSettingsConfigPath() {
-        return null;
+        return new config_path_1.default(settingsConfigDir);
     }
+    AppContext.getSettingsConfigPath = getSettingsConfigPath;
     function getInstanceConfigPath() {
-        return null;
+        return new config_path_1.default(instanceConfigDir);
     }
+    AppContext.getInstanceConfigPath = getInstanceConfigPath;
     function getConfig(path) {
-        return null;
+        return path.loadConfig();
     }
     AppContext.getConfig = getConfig;
 })(AppContext = exports.AppContext || (exports.AppContext = {}));
