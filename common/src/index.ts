@@ -1,3 +1,3 @@
 import AppContext from "./lib/app-context";
-
-export { AppContext }
+import ConfigPath from "./lib/config/config-path";
+export { AppContext, ConfigPath }
