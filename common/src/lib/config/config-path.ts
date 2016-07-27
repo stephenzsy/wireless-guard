@@ -1,10 +1,15 @@
 import * as path from "path";
 import * as fs from "fs";
+import * as fse from "fs-extra";
 
 export class ConfigPath {
-    private fsPath: string;
+    private _fsPath: string;
     constructor(joinedPath) {
-        this.fsPath = joinedPath;
+        this._fsPath = joinedPath;
+    }
+
+    public get fsPath(): string {
+        return this._fsPath;
     }
 
     public path(...paths: string[]): ConfigPath {
@@ -13,6 +18,11 @@ export class ConfigPath {
             subFsPath = path.join(subFsPath, p);
         }
         return new ConfigPath(subFsPath);
+    }
+
+    public ensureDirExists(): this {
+        fse.mkdirpSync(path.dirname(this.fsPath));
+        return this;
     }
 
     public loadConfig(): any {

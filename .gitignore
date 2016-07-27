@@ -7,3 +7,4 @@ deploy/dist/**/*
 deploy/src/**/*.js
 typings
 *.log
+config

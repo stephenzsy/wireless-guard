@@ -19,5 +19,8 @@
     "merge2": "^1.0.2",
     "wireless-guard-tools": "^0.0.1"
   },
-  "typings": "dist/typings/index.d.ts"
+  "typings": "dist/typings/index.d.ts",
+  "dependencies": {
+    "fs-extra": "^0.30.0"
+  }
 }
