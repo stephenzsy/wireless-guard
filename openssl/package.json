@@ -8,6 +8,10 @@
   },
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://stepzsy.visualstudio.com/DefaultCollection/_git/wireless-guard"
+  },
   "devDependencies": {
     "del": "^2.2.1",
     "gulp": "^3.9.1",
@@ -16,5 +20,8 @@
     "merge2": "^1.0.2",
     "typings": "^1.3.2"
   },
-  "typings": "dist/typings/index.d.ts"
+  "typings": "dist/typings/index.d.ts",
+  "dependencies": {
+    "moment": "^2.14.1"
+  }
 }
