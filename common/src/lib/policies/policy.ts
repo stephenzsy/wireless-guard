@@ -1,10 +1,8 @@
-export enum GeneralPolicyResourceType {
-    All
-}
+export type IPolicyActionsType = "*" | string[];
+export type IPolicyResource = string | RegExp;
+export type IPolicyResourcesType = "*" | IPolicyResource[];
 
-export type IPolicyResource = GeneralPolicyResourceType | string | RegExp;
-
-export enum PolicyAction {
+export enum PolicyEffect {
     Default, // fall through
     Allow,
     Deny
@@ -12,41 +10,62 @@ export enum PolicyAction {
 
 export interface IPolicy {
     id: string;
-    resource: IPolicyResource;
-    action: PolicyAction;
-    matches(resource: string): boolean;
+    name: string;
+    actions: IPolicyActionsType;
+    resources: IPolicyResourcesType;
+    effect: PolicyEffect;
 }
 
 export class Policy implements IPolicy {
     private _id: string;
-    private _resource: IPolicyResource;
-    private _action: PolicyAction;
+    private _name: string;
+    private _actions: IPolicyActionsType;
+    private _resources: IPolicyResourcesType;
+    private _effect: PolicyEffect;
 
-    constructor(id: string, resource: IPolicyResource, action: PolicyAction) {
+    constructor(id: string, name: string, actions: IPolicyActionsType, resources: IPolicyResourcesType, effect: PolicyEffect) {
         this._id = id;
-        this._resource = resource;
-        this._action = action;
+        this._name = name;
+        this._actions = actions;
+        this._resources = resources;
+        this._effect = effect;
     }
 
     public get id(): string {
         return this._id;
     }
 
-    public get resource(): IPolicyResource {
-        return this._resource;
+    public get name(): string {
+        return this._name;
     }
 
-    public get action(): PolicyAction {
-        return this._action;
+    public get actions(): IPolicyActionsType {
+        return [].concat(this._actions);
     }
 
-    public matches(resource: string): boolean {
-        if (this._resource === GeneralPolicyResourceType.All) {
-            return true;
+    public get resources(): IPolicyResourcesType {
+        return [].concat(this._resources);
+    }
+
+    public get effect(): PolicyEffect {
+        return this._effect;
+    }
+
+    public test(action: string, resource: string): boolean {
+        // test action
+        if (this._actions !== "*" && !(this._actions as string[]).some(a => (a === action))) {
+            return false;
         }
-        if (typeof this._resource === "string") {
-            return this._resource === resource;
+
+        if (this._resources !== "*" && !(this._resources as IPolicyResource[])
+            .some(r => {
+                if (typeof r === "string") {
+                    return (r === resource);
+                }
+                return (r as RegExp).test(resource);
+            })) {
+            return false;
         }
-        return (this._resource as RegExp).test(resource);
+        return true;
     }
 }

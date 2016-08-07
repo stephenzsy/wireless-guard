@@ -1,6 +1,5 @@
 import {
-    GeneralPolicyResourceType,
-    PolicyAction,
+    PolicyEffect,
     IPolicy,
     Policy
 } from "./policy";
@@ -10,5 +9,5 @@ export module BuiltInPolicyIds {
     export const allowAll: string = "1de6d199-f4dd-4ffe-895d-30f6542addb8";
 }
 
-export const denyAll: IPolicy = new Policy(BuiltInPolicyIds.denyAll, GeneralPolicyResourceType.All, PolicyAction.Deny);
-export const allowAll: IPolicy = new Policy(BuiltInPolicyIds.allowAll, GeneralPolicyResourceType.All, PolicyAction.Allow);
+export const denyAll: IPolicy = new Policy(BuiltInPolicyIds.denyAll, "deny-all", "*", "*", PolicyEffect.Deny);
+export const allowAll: IPolicy = new Policy(BuiltInPolicyIds.allowAll, "allow-all", "*", "*", PolicyEffect.Allow);

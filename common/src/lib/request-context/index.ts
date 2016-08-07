@@ -1,3 +1,7 @@
-export interface RequestContext {
-    appInstanceId: string;
+import {
+    IUserContext
+} from "./user-context";
+
+export interface IRequestContext {
+    userContext: IUserContext;
 }

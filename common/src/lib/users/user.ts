@@ -1,6 +1,10 @@
 import {
     IUserEntity
 } from "./user-entity";
+import {
+    IPolicy,
+    Policy
+} from "../policies/policy";
 
 export abstract class UserBase implements IUserEntity {
     private _id: string;
@@ -20,4 +24,6 @@ export abstract class UserBase implements IUserEntity {
     }
 
     public abstract getMemberGroups(): IUserEntity[];
+
+    public abstract getPolicies(): IPolicy[];
 }
