@@ -21,7 +21,7 @@ var AppContext;
     }
     AppContext.getInstanceConfigPath = getInstanceConfigPath;
     function getConfig(path) {
-        return path.loadConfig();
+        return path.loadJsonConfig();
     }
     AppContext.getConfig = getConfig;
 })(AppContext = exports.AppContext || (exports.AppContext = {}));

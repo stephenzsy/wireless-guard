@@ -11,12 +11,13 @@ import {
     IPolicy,
     Policy
 } from "../policies/policy";
+import Guid from "../common/guid";
 import * as BuiltinPolicies from "../policies/builtin-policies";
 
 module BuiltInUserEntityIds {
-    export const rootUserId: string = "36363225-cd25-42aa-a2db-8b4f2c8d877f";
+    export const rootUserId: Guid = new Guid("36363225-cd25-42aa-a2db-8b4f2c8d877f");
 
-    export const rootUserGroupId: string = "b170b87a-516e-4e84-b1cb-1996c06d03e1";
+    export const rootUserGroupId: Guid = new Guid("b170b87a-516e-4e84-b1cb-1996c06d03e1");
 }
 
 namespace BuiltInUserEntities {
@@ -40,7 +41,7 @@ namespace BuiltInUserEntities {
         }
 
         public _addToGroup(group: BuiltInUserGroup) {
-            this.groups[group.id] = group;
+            this.groups[group.id.toString()] = group;
         }
 
         /**
@@ -81,7 +82,7 @@ namespace BuiltInUserEntities {
         }
 
         public _addMember(user: BuiltInUser) {
-            this.members[user.id] = user;
+            this.members[user.id.toString()] = user;
         }
 
         /**

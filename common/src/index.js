@@ -5,3 +5,5 @@ const config_path_1 = require("./lib/config/config-path");
 exports.ConfigPath = config_path_1.default;
 const BuiltInUserEntities = require("./lib/users/builtin-user-entities");
 exports.BuiltInUserEntities = BuiltInUserEntities;
+const PrivateKey = require("./lib/secrets/private-key");
+exports.PrivateKey = PrivateKey;

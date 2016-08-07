@@ -25,8 +25,12 @@ export class ConfigPath {
         return this;
     }
 
-    public loadConfig(): any {
-        return require(this.fsPath).config;
+    public loadJsonConfig<T>(): T {
+        return require(this.fsPath) as T;
+    }
+
+    public saveJsonConfig<T>(config: T): void {
+        fse.writeJsonSync(this.fsPath, config);
     }
 }
 

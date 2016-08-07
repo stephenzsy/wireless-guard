@@ -1,6 +1,5 @@
 import Guid from "../common/guid";
 
-export interface IUserEntity {
+export interface ISecret {
     id: Guid;
-    name: string;
 }

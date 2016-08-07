@@ -1,5 +1,10 @@
-import { AppContext, ConfigPath } from "wireless-guard-common";
-import { PrivateKeyUtil } from "wireless-guard-openssl";
+import {
+    AppContext,
+    ConfigPath,
+    BuiltInUserEntities,
+    PrivateKey
+} from "wireless-guard-common";
+
 export interface CaConfig {
     country: string;
     stateOrProviceName: string;
@@ -21,9 +26,7 @@ const caConfig = AppContext.getConfig<CaConfig>(caConfigPath);
 const caPrivateKeyPath: string = AppContext.getInstanceConfigPath().path("certs", "ca", "ca.key").ensureDirExists().fsPath;
 
 async function configure() {
-    await PrivateKeyUtil.createEcPrivateKey({
-        out: caPrivateKeyPath
-    });
+    await PrivateKey.createNewEcPrivateKeyAsync(BuiltInUserEntities.rootUser);
 }
 
 async function execute() {

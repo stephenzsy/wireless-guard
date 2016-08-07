@@ -26,7 +26,7 @@ export module AppContext {
     }
 
     export function getConfig<T>(path: ConfigPath): T {
-        return path.loadConfig() as T;
+        return path.loadJsonConfig() as T;
     }
 }
 

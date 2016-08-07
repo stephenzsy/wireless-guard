@@ -1,7 +1,5 @@
-import * as PrivateKeyUtil from "./private-key-util"
+import * as Ecparam from "./ecparam"
 
 export module WGOpenssl {
     export const ecparam = Ecparam;
 }
-
-export { PrivateKeyUtil }
