@@ -32,3 +32,5 @@ export function ecparam(opt: EcparamOptions): Promise<void> {
 
     return execFile("openssl", args);
 }
+
+export default ecparam;

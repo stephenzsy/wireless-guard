@@ -1,16 +1,31 @@
 import {
-    ISecret
+    ISecret,
+    SecretBase
 } from "./secret"
 import {
     IUser
 } from "../users/user";
+import {
+    IRequestContext
+} from "../request-context";
 import Guid from "../common/guid";
 import { IManifest } from "./manifest";
 import ManifestRepo from "./manifest-repo";
 import { WGOpenssl } from "wireless-guard-openssl";
 import ConfigPath from "../config/config-path";
 
+export module Authorization {
+    export module Action {
+        export const createPrivateKey: string = "create";
+    }
+
+    export module Resource {
+        export const createPrivateKey: string = "secret:private-key::";
+    }
+}
+
 export interface IAsymmetricPrivateKey extends ISecret {
+    pemFilePath: ConfigPath;
 }
 
 namespace AsymmetricPrivateKey {
@@ -19,15 +34,9 @@ namespace AsymmetricPrivateKey {
         pemFilePath: string;
     }
 
-    abstract class KeyBase<M extends IPrivateKeyManifestBase> implements IAsymmetricPrivateKey {
-        private _id: Guid;
-
-        constructor(manifest: M) {
-            this._id = new Guid(manifest.id);
-        }
-
-        public get id(): Guid {
-            return this._id;
+    abstract class KeyBase<M extends IPrivateKeyManifestBase> extends SecretBase<M> implements IAsymmetricPrivateKey {
+        public get pemFilePath(): ConfigPath {
+            return new ConfigPath(this.manifest.pemFilePath);
         }
     }
 
@@ -41,12 +50,14 @@ namespace AsymmetricPrivateKey {
         }
     }
 
-    export async function createNewEcPrivateKeyAsync(user: IUser): Promise<EcPrivateKey> {
-        let manifest: IEcManifest = ManifestRepo.initManifest(user) as IEcManifest;
+    export async function createNewEcPrivateKeyAsync(requestContext: IRequestContext): Promise<EcPrivateKey> {
+        requestContext.authorize(Authorization.Action.createPrivateKey, Authorization.Resource.createPrivateKey);
+
+        let manifest: IEcManifest = ManifestRepo.initManifest(requestContext.userContext.user) as IEcManifest;
         manifest.algorithm = "ec";
         manifest.curve = "secp384r1";
         let privateKeyPath = new ConfigPath(manifest.secretsDirPath).path("key.pem");
-        await WGOpenssl.ecparam.ecparam({
+        await WGOpenssl.ecparam({
             out: privateKeyPath.fsPath
         });
         manifest.pemFilePath = privateKeyPath.fsPath;
@@ -65,4 +76,4 @@ namespace AsymmetricPrivateKey {
     }
 }
 
-export const createNewEcPrivateKeyAsync: (user: IUser) => Promise<IAsymmetricPrivateKey> = AsymmetricPrivateKey.createNewEcPrivateKeyAsync;
+export const createNewEcPrivateKeyAsync: (requestContext: IRequestContext) => Promise<IAsymmetricPrivateKey> = AsymmetricPrivateKey.createNewEcPrivateKeyAsync;

@@ -2,18 +2,11 @@ import {
     AppContext,
     ConfigPath,
     BuiltInUserEntities,
-    PrivateKey
+    PrivateKey,
+    RequestContext,
+    CaCert,
+    CertSubject
 } from "wireless-guard-common";
-
-export interface CaConfig {
-    country: string;
-    stateOrProviceName: string;
-    localityName: string;
-    organizationName: string;
-    organizationUnitName: string;
-    commonName: string;
-    emailAddress: string;
-}
 
 if (!AppContext.hasConfig()) {
     throw "Config not available";
@@ -21,12 +14,17 @@ if (!AppContext.hasConfig()) {
 
 const caConfigPath = AppContext.getSettingsConfigPath().path("cert", "ca.json");
 
-const caConfig = AppContext.getConfig<CaConfig>(caConfigPath);
-
-const caPrivateKeyPath: string = AppContext.getInstanceConfigPath().path("certs", "ca", "ca.key").ensureDirExists().fsPath;
+const certSubjectConfig = AppContext.getConfig<CertSubject.CertSubjectConfig>(caConfigPath);
+const certSubject = new CertSubject.CertSubject(certSubjectConfig)
 
 async function configure() {
-    await PrivateKey.createNewEcPrivateKeyAsync(BuiltInUserEntities.rootUser);
+    let requestContext = RequestContext.newUserRequestContext(BuiltInUserEntities.rootUser);
+    let privateKey = await PrivateKey.createNewEcPrivateKeyAsync(requestContext);
+    await CaCert.createRootCaCertAsync(requestContext,
+        privateKey,
+        0,
+        certSubject.subject);
+
 }
 
 async function execute() {

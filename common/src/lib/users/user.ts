@@ -1,9 +1,9 @@
 import {
-    IUserEntity
+    IUserEntity,
+    UserEntityBase
 } from "./user-entity";
 import {
     IPolicy,
-    Policy
 } from "../policies/policy";
 import {
     IUserGroup
@@ -11,26 +11,9 @@ import {
 import Guid from "../common/guid";
 
 export interface IUser extends IUserEntity {
+    getMemberGroups(): IUserGroup[];
 }
 
-export abstract class UserBase implements IUser {
-    private _id: Guid;
-    private _name: string;
-
-    constructor(id: Guid, name: string) {
-        this._id = id;
-        this._name = name;
-    }
-
-    public get id(): Guid {
-        return this._id;
-    }
-
-    public get name(): string {
-        return this._name;
-    }
-
+export abstract class UserBase extends UserEntityBase implements IUser {
     public abstract getMemberGroups(): IUserGroup[];
-
-    public abstract getPolicies(): IPolicy[];
 }

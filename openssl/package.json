@@ -22,6 +22,5 @@
   },
   "typings": "dist/typings/index.d.ts",
   "dependencies": {
-    "moment": "^2.14.1"
   }
 }

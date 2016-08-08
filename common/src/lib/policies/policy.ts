@@ -40,10 +40,16 @@ export class Policy implements IPolicy {
     }
 
     public get actions(): IPolicyActionsType {
+        if (this._actions === "*") {
+            return this._actions;
+        }
         return [].concat(this._actions);
     }
 
     public get resources(): IPolicyResourcesType {
+        if (this._resources === "*") {
+            return this._resources;
+        }
         return [].concat(this._resources);
     }
 

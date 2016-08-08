@@ -2,6 +2,7 @@ import {
     IUserEntity
 } from "./user-entity";
 import {
+    IUser,
     UserBase
 } from "./user";
 import {
@@ -13,6 +14,7 @@ import {
 } from "../policies/policy";
 import Guid from "../common/guid";
 import * as BuiltinPolicies from "../policies/builtin-policies";
+import { IRequestContext } from "../request-context";
 
 module BuiltInUserEntityIds {
     export const rootUserId: Guid = new Guid("36363225-cd25-42aa-a2db-8b4f2c8d877f");
@@ -23,11 +25,6 @@ module BuiltInUserEntityIds {
 namespace BuiltInUserEntities {
     class BuiltInUser extends UserBase {
         private groups: IDictionaryStringTo<BuiltInUserGroup> = {};
-        private _policies: Policy[];
-
-        constructor(id, name) {
-            super(id, name);
-        }
 
         /**
          *@override
@@ -44,18 +41,6 @@ namespace BuiltInUserEntities {
             this.groups[group.id.toString()] = group;
         }
 
-        /**
-         * @override
-         */
-        public getPolicies(): IPolicy[] {
-            return this._policies.map(p => ({
-                id: p.id,
-                name: p.name,
-                actions: p.actions,
-                resources: p.resources,
-                effect: p.effect
-            }));
-        }
 
         public set policies(value: IPolicy[]) {
             this._policies = value.map(p => new Policy(p.id, p.name, p.actions, p.resources, p.effect));
@@ -64,7 +49,6 @@ namespace BuiltInUserEntities {
 
     class BuiltInUserGroup extends UserGroupBase {
         private members: IDictionaryStringTo<BuiltInUser> = {};
-        private _policies: Policy[];
 
         constructor(id, name) {
             super(id, name);
@@ -83,19 +67,6 @@ namespace BuiltInUserEntities {
 
         public _addMember(user: BuiltInUser) {
             this.members[user.id.toString()] = user;
-        }
-
-        /**
-         * @override
-         */
-        public getPolicies(): IPolicy[] {
-            return this._policies.map(p => ({
-                id: p.id,
-                name: p.name,
-                actions: p.actions,
-                resources: p.resources,
-                effect: p.effect
-            }));
         }
 
         public set policies(value: IPolicy[]) {
@@ -126,4 +97,4 @@ namespace BuiltInUserEntities {
     export const rootUserAndGroup = createRootUserAndGroup();
 }
 
-export const rootUser: IUserEntity = BuiltInUserEntities.rootUserAndGroup.user;
+export const rootUser: IUser = BuiltInUserEntities.rootUserAndGroup.user;
