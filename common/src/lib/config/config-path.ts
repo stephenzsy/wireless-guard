@@ -20,6 +20,14 @@ export class ConfigPath {
         return new ConfigPath(subFsPath);
     }
 
+    public get exists(): boolean {
+        return fs.existsSync(this.fsPath);
+    }
+
+    public get isDirectory(): boolean {
+        return fs.statSync(this.fsPath).isDirectory();
+    }
+
     public ensureDirExists(): this {
         fse.mkdirpSync(path.dirname(this.fsPath));
         return this;

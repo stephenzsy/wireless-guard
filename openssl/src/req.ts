@@ -4,7 +4,7 @@ export interface ReqOptions {
     new?: boolean,
     x509?: boolean,
     extensions?: "v3_ca",
-    setSerial?: number,
+    setSerial?: string,
     key?: string,
     out?: string,
     digest?: "sha384",
@@ -28,7 +28,7 @@ export function req(opt: ReqOptions): Promise<void> {
     }
 
     if (opt.setSerial) {
-        args.push("-set_serial", opt.setSerial.toString());
+        args.push("-set_serial", opt.setSerial);
     }
 
     if (opt.key) {

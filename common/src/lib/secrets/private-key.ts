@@ -28,13 +28,15 @@ export interface IAsymmetricPrivateKey extends ISecret {
     pemFilePath: ConfigPath;
 }
 
-namespace AsymmetricPrivateKey {
-    interface IPrivateKeyManifestBase extends IManifest {
-        algorithm: "ec" | "rsa";
-        pemFilePath: string;
-    }
+export interface IAsymmetricPrivateKeyManifest extends IManifest {
+    algorithm: "ec" | "rsa";
+    pemFilePath: string;
+}
 
-    abstract class KeyBase<M extends IPrivateKeyManifestBase> extends SecretBase<M> implements IAsymmetricPrivateKey {
+namespace AsymmetricPrivateKey {
+    type IPrivateKeyManifestBase = IAsymmetricPrivateKeyManifest;
+
+    class KeyBase<M extends IPrivateKeyManifestBase> extends SecretBase<M> implements IAsymmetricPrivateKey {
         public get pemFilePath(): ConfigPath {
             return new ConfigPath(this.manifest.pemFilePath);
         }
@@ -63,10 +65,12 @@ namespace AsymmetricPrivateKey {
         manifest.pemFilePath = privateKeyPath.fsPath;
         // store new manifest
         new ConfigPath(manifest.manifestPath).saveJsonConfig(manifest);
+        requestContext.log("info", "Created private key: " + manifest.id);
         return new EcPrivateKey(manifest);
     }
 
     interface IRsaManifest extends IPrivateKeyManifestBase {
+        numbits: number;
     }
 
     class RsaPrivateKey extends KeyBase<IRsaManifest> {
@@ -74,6 +78,39 @@ namespace AsymmetricPrivateKey {
             super(manifest);
         }
     }
+
+    export async function createNewRsaPrivateKeyAsync(requestContext: IRequestContext): Promise<RsaPrivateKey> {
+        requestContext.authorize(Authorization.Action.createPrivateKey, Authorization.Resource.createPrivateKey);
+
+        let manifest: IRsaManifest = ManifestRepo.initManifest(requestContext.userContext.user) as IRsaManifest;
+        manifest.algorithm = "rsa";
+        manifest.numbits = 4096;
+        let privateKeyPath = new ConfigPath(manifest.secretsDirPath).path("key.pem");
+        await WGOpenssl.genrsa({
+            out: privateKeyPath.fsPath,
+            numbits: 4096
+        });
+        manifest.pemFilePath = privateKeyPath.fsPath;
+        // store new manifest
+        new ConfigPath(manifest.manifestPath).saveJsonConfig(manifest);
+        requestContext.log("info", "Created private key: " + manifest.id);
+
+        return new RsaPrivateKey(manifest);
+    }
+
+    export function loadPrivateKeyFromManifest(requestContext: IRequestContext, manifest: IAsymmetricPrivateKeyManifest): IAsymmetricPrivateKey {
+        return new KeyBase(manifest);
+    }
 }
 
-export const createNewEcPrivateKeyAsync: (requestContext: IRequestContext) => Promise<IAsymmetricPrivateKey> = AsymmetricPrivateKey.createNewEcPrivateKeyAsync;
+export function createNewEcPrivateKeyAsync(requestContext: IRequestContext): Promise<IAsymmetricPrivateKey> {
+    return AsymmetricPrivateKey.createNewEcPrivateKeyAsync(requestContext);
+}
+
+export function createNewRsaPrivateKeyAsync(requestContext: IRequestContext): Promise<IAsymmetricPrivateKey> {
+    return AsymmetricPrivateKey.createNewRsaPrivateKeyAsync(requestContext);
+}
+
+export function loadPrivateKeyFromManifest(requestContext: IRequestContext, manifest: IAsymmetricPrivateKeyManifest): IAsymmetricPrivateKey {
+    return AsymmetricPrivateKey.loadPrivateKeyFromManifest(requestContext, manifest);
+}

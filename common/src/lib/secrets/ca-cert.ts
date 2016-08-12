@@ -1,41 +1,37 @@
 import {
     ISecret,
-    SecretBase
+    SecretBase,
+    Authorization as SecretAuthorization
 } from "./secret"
 import {
     IUser
 } from "../users/user";
+import AppContext from "../app-context";
 import {
     IRequestContext
 } from "../request-context";
 import Guid from "../common/guid";
 import { IManifest } from "./manifest";
 import ManifestRepo from "./manifest-repo";
-import { WGOpenssl } from "wireless-guard-openssl";
+import WGOpenssl from "wireless-guard-openssl";
 import ConfigPath from "../config/config-path";
 import * as moment from "moment";
-import { IAsymmetricPrivateKey } from "./private-key";
+import { IAsymmetricPrivateKey, IAsymmetricPrivateKeyManifest, loadPrivateKeyFromManifest } from "./private-key";
+import { CertBase, ICert, ICertManifest, getGuidSerial } from "./cert-base";
 
 export module Authorization {
-    export module Action {
-        export const createRootCa: string = "create";
-    }
-
     export module Resource {
         export const createRootCa: string = "secret:root-ca::";
+        export const readPrivateKey: string = "secret:private-key::";
     }
 }
 
-export interface IRootCaCert extends ISecret {
-}
+export interface IRootCaCert extends ICert { }
 
 namespace RootCaCert {
-    interface IRootCaCertManifest extends IManifest {
-        expireAt: string;
-        pemFilePath: string;
-    }
+    interface IRootCaCertManifest extends ICertManifest { }
 
-    class RootCaCert extends SecretBase<IRootCaCertManifest> implements IRootCaCert {
+    class RootCaCert extends CertBase<IRootCaCertManifest> implements IRootCaCert {
         constructor(manifest: IRootCaCertManifest) {
             super(manifest);
         }
@@ -43,9 +39,8 @@ namespace RootCaCert {
 
     export async function createRootCaCertAsync(requestContext: IRequestContext,
         privateKey: IAsymmetricPrivateKey,
-        serial: number,
         subject: string): Promise<RootCaCert> {
-        requestContext.authorize(Authorization.Action.createRootCa, Authorization.Resource.createRootCa);
+        requestContext.authorize(SecretAuthorization.Action.createSecret, Authorization.Resource.createRootCa);
 
         let manifest: IRootCaCertManifest = ManifestRepo.initManifest(requestContext.userContext.user) as IRootCaCertManifest;
         // expiry to be actual expiry - 1 day
@@ -56,8 +51,8 @@ namespace RootCaCert {
             new: true,
             x509: true,
             extensions: "v3_ca",
-            setSerial: serial,
             key: privateKey.pemFilePath.fsPath,
+            setSerial: getGuidSerial(new Guid(manifest.id)),
             out: certPath.fsPath,
             digest: "sha384",
             subj: subject,
@@ -72,5 +67,51 @@ namespace RootCaCert {
 
 export const createRootCaCertAsync: (requestContext: IRequestContext,
     privateKey: IAsymmetricPrivateKey,
-    serial: number,
     subject: string) => Promise<IRootCaCert> = RootCaCert.createRootCaCertAsync;
+
+export interface CaCertSuiteManifest {
+    certId: string,
+    privateKeyId: string
+}
+
+export interface ICaCertSuite {
+    getPrivateKey(requestContext: IRequestContext): IAsymmetricPrivateKey;
+}
+
+export class CaCertSuite implements ICaCertSuite {
+    private manifest: CaCertSuiteManifest;
+    constructor(manifest: CaCertSuiteManifest) {
+        this.manifest = manifest;
+    }
+
+    public getPrivateKey(requestContext: IRequestContext): IAsymmetricPrivateKey {
+        // TODO: enhance authorization
+        requestContext.authorize(SecretAuthorization.Action.readSecret, Authorization.Resource.readPrivateKey);
+        let manifest = ManifestRepo.loadManifest<IAsymmetricPrivateKeyManifest>(this.manifest.privateKeyId);
+        return loadPrivateKeyFromManifest(requestContext, manifest);
+    }
+}
+
+export module BuiltInCaCertSuites {
+    const certDirPath = AppContext.getInstanceConfigPath().path("certs");
+    const caPath = certDirPath.path("ca.json");
+    const dbCaPath = certDirPath.path("db-ca.json");
+
+    export function getCaCertSuiteManifest(): CaCertSuiteManifest {
+        return require(caPath.fsPath) as CaCertSuiteManifest;
+    }
+
+    export function getDbCaCertSuiteManifest(): CaCertSuiteManifest {
+        return require(dbCaPath.fsPath) as CaCertSuiteManifest;
+    }
+
+    export function setCaCertSuiteManifest(suite: CaCertSuiteManifest): void {
+        caPath.ensureDirExists()
+            .saveJsonConfig(suite);
+    }
+
+    export function setDbCaCertSuiteManifest(suite: CaCertSuiteManifest): void {
+        dbCaPath.ensureDirExists()
+            .saveJsonConfig(suite);
+    }
+}

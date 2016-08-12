@@ -5,6 +5,13 @@ export interface ISecret {
     id: Guid;
 }
 
+export module Authorization {
+    export module Action {
+        export const createSecret: string = "create";
+        export const readSecret: string = "read";
+    }
+}
+
 export class SecretBase<M extends IManifest> {
     private _id: Guid;
     protected manifest: M;

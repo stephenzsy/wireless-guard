@@ -13,10 +13,14 @@ import {
 import {
     IUser
 } from "../users/user";
+import * as winston from "winston";
+
+export type LogLevel = "info" | "debug";
 
 export interface IRequestContext {
     userContext: IUserContext;
     authorize(action: string, resource: string);
+    log(level: LogLevel, message: string);
 }
 
 class AnonymousNotAllowedError extends AuthorizationErrors.NotAuthorized { }
@@ -48,6 +52,13 @@ class RequestContext implements IRequestContext {
         if (!result || result.effect !== PolicyEffect.Allow) {
             throw new PolicyDeniedError(result);
         }
+    }
+
+    public log(level: LogLevel, message: string) {
+        winston.log(level, message, {
+            requestId: this.requestId.toString(),
+            userId: (this.userContext ? this.userContext.user.id.toString() : "anonymous")
+        })
     }
 }
 

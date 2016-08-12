@@ -1,0 +1,9 @@
+{
+  "country": "ZZ",
+  "stateOrProviceName": "AA",
+  "localityName": "None",
+  "organizationName": "None",
+  "organizationUnitName": "None",
+  "commonName": "DB Server Test",
+  "emailAddress": "db@system"
+}

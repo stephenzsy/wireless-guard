@@ -13,3 +13,5 @@ const RequestContext = require("./lib/request-context");
 exports.RequestContext = RequestContext;
 const CertSubject = require("./lib/secrets/cert-subject");
 exports.CertSubject = CertSubject;
+const ServerCert = require("./lib/secrets/server-cert");
+exports.ServerCert = ServerCert;

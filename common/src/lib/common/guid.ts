@@ -56,6 +56,12 @@ export class Guid {
             + "-" + yCharTransform[str.charAt(16)] + str.substr(17, 3)
             + "-" + str.substr(20, 12);
     }
+
+    public static convertToHexString(guid: Guid): string {
+        let str = guid.toString().replace(/-/g, "");
+        console.log(str);
+        return str;
+    }
 }
 
 export default Guid;

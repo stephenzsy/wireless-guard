@@ -5,6 +5,7 @@ import * as PrivateKey from "./lib/secrets/private-key";
 import * as CaCert from "./lib/secrets/ca-cert";
 import * as RequestContext from "./lib/request-context";
 import * as CertSubject from "./lib/secrets/cert-subject";
+import * as ServerCert from "./lib/secrets/server-cert";
 
 export {
     AppContext,
@@ -13,5 +14,6 @@ export {
     PrivateKey,
     RequestContext,
     CaCert,
+    ServerCert,
     CertSubject
 }
