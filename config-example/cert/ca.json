@@ -1,9 +1,12 @@
 {
-  "country": "ZZ",
-  "stateOrProviceName": "AA",
-  "localityName": "None",
-  "organizationName": "None",
-  "organizationUnitName": "None",
-  "commonName": "Example Test Internal Root CA",
-  "emailAddress": "root@system"
+  "subject": {
+    "country": "ZZ",
+    "stateOrProviceName": "AA",
+    "localityName": "None",
+    "organizationName": "None",
+    "organizationUnitName": "None",
+    "commonName": "Example Test Internal Root CA",
+    "emailAddress": "root@system"
+  },
+  "days": 30
 }

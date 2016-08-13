@@ -5,7 +5,7 @@ import {
     PrivateKey,
     RequestContext,
     CaCert,
-    CertSubject
+    CertCreateContext
 } from "wireless-guard-common";
 
 if (!AppContext.hasConfig()) {
@@ -13,8 +13,8 @@ if (!AppContext.hasConfig()) {
 }
 
 const caConfigPath = AppContext.getSettingsConfigPath().path("cert", "ca.json");
-const certSubjectConfig = AppContext.getConfig<CertSubject.CertSubjectConfig>(caConfigPath);
-const certSubject = new CertSubject.CertSubject(certSubjectConfig);
+const certConfig = AppContext.getConfig<CertCreateContext.CertConfig>(caConfigPath);
+const certSubject = new CertCreateContext.CertSubject(certConfig.subject);
 
 const rootUserContext = RequestContext.newUserRequestContext(BuiltInUserEntities.rootUser);
 
@@ -23,7 +23,7 @@ async function configureEcCertificate() {
     let cert = await CaCert.createRootCaCertAsync(rootUserContext,
         privateKey,
         certSubject.subject);
-    CaCert.BuiltInCaCertSuites.setCaCertSuiteManifest({
+    CaCert.BuiltInCaCertSuites.setCaCertSuiteConfig({
         certId: cert.id.toString(),
         privateKeyId: privateKey.id.toString()
     });
@@ -34,7 +34,7 @@ async function configureRsaCertificate() {
     let cert = await CaCert.createRootCaCertAsync(rootUserContext,
         privateKey,
         certSubject.subject);
-    CaCert.BuiltInCaCertSuites.setDbCaCertSuiteManifest({
+    CaCert.BuiltInCaCertSuites.setDbCaCertSuiteConfig({
         certId: cert.id.toString(),
         privateKeyId: privateKey.id.toString()
     });

@@ -9,6 +9,7 @@ export module Authorization {
     export module Action {
         export const createSecret: string = "create";
         export const readSecret: string = "read";
+        export const deleteSecret: string = "delete";
     }
 }
 

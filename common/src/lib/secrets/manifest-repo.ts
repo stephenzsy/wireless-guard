@@ -15,9 +15,9 @@ export module SecretManifiestRepository {
         }
     }
 
-    export function initManifest(owner: IUser): IManifest {
+    export function initManifest(owner: IUser, configPath: ConfigPath = AppContext.getInstanceConfigPath()): IManifest {
         let id = new Guid();
-        let secretDirPath = AppContext.getInstanceConfigPath()
+        let secretDirPath = configPath
             .path(secretsDir)
             .path(id.toString());
         let manifestPath = secretDirPath.path(manifestFilename);

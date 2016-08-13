@@ -30,3 +30,8 @@ export abstract class CertBase<M extends ICertManifest> extends SecretBase<M> im
 export function getGuidSerial(guid: Guid): string {
     return "0x" + Guid.convertToHexString(guid);
 }
+
+export interface ICertSuiteConfig {
+    certId: string,
+    privateKeyId: string
+}

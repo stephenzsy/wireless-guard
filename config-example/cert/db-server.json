@@ -1,9 +1,12 @@
 {
-  "country": "ZZ",
-  "stateOrProviceName": "AA",
-  "localityName": "None",
-  "organizationName": "None",
-  "organizationUnitName": "None",
-  "commonName": "db.wireless-guard.local",
-  "emailAddress": "db@system"
+  "subject": {
+    "country": "ZZ",
+    "stateOrProviceName": "AA",
+    "localityName": "None",
+    "organizationName": "None",
+    "organizationUnitName": "None",
+    "commonName": "db.wireless-guard.local",
+    "emailAddress": "db@system"
+  },
+  "days": 30
 }

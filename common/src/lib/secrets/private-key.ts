@@ -79,10 +79,11 @@ namespace AsymmetricPrivateKey {
         }
     }
 
-    export async function createNewRsaPrivateKeyAsync(requestContext: IRequestContext): Promise<RsaPrivateKey> {
+    export async function createNewRsaPrivateKeyAsync(requestContext: IRequestContext,
+        configPath?: ConfigPath): Promise<RsaPrivateKey> {
         requestContext.authorize(Authorization.Action.createPrivateKey, Authorization.Resource.createPrivateKey);
 
-        let manifest: IRsaManifest = ManifestRepo.initManifest(requestContext.userContext.user) as IRsaManifest;
+        let manifest: IRsaManifest = ManifestRepo.initManifest(requestContext.userContext.user, configPath) as IRsaManifest;
         manifest.algorithm = "rsa";
         manifest.numbits = 4096;
         let privateKeyPath = new ConfigPath(manifest.secretsDirPath).path("key.pem");
@@ -107,8 +108,9 @@ export function createNewEcPrivateKeyAsync(requestContext: IRequestContext): Pro
     return AsymmetricPrivateKey.createNewEcPrivateKeyAsync(requestContext);
 }
 
-export function createNewRsaPrivateKeyAsync(requestContext: IRequestContext): Promise<IAsymmetricPrivateKey> {
-    return AsymmetricPrivateKey.createNewRsaPrivateKeyAsync(requestContext);
+export function createNewRsaPrivateKeyAsync(requestContext: IRequestContext,
+    configPath?: ConfigPath): Promise<IAsymmetricPrivateKey> {
+    return AsymmetricPrivateKey.createNewRsaPrivateKeyAsync(requestContext, configPath);
 }
 
 export function loadPrivateKeyFromManifest(requestContext: IRequestContext, manifest: IAsymmetricPrivateKeyManifest): IAsymmetricPrivateKey {

@@ -17,7 +17,7 @@ import WGOpenssl from "wireless-guard-openssl";
 import ConfigPath from "../config/config-path";
 import * as moment from "moment";
 import { IAsymmetricPrivateKey, IAsymmetricPrivateKeyManifest, loadPrivateKeyFromManifest } from "./private-key";
-import { CertBase, ICert, ICertManifest, getGuidSerial } from "./cert-base";
+import { CertBase, ICert, ICertManifest, getGuidSerial, ICertSuiteConfig } from "./cert-base";
 
 export module Authorization {
     export module Resource {
@@ -69,31 +69,26 @@ export const createRootCaCertAsync: (requestContext: IRequestContext,
     privateKey: IAsymmetricPrivateKey,
     subject: string) => Promise<IRootCaCert> = RootCaCert.createRootCaCertAsync;
 
-export interface CaCertSuiteManifest {
-    certId: string,
-    privateKeyId: string
-}
-
 export interface ICaCertSuite {
     getPrivateKey(requestContext: IRequestContext): IAsymmetricPrivateKey;
     getCertificate(): IRootCaCert;
 }
 
 export class CaCertSuite implements ICaCertSuite {
-    private manifest: CaCertSuiteManifest;
-    constructor(manifest: CaCertSuiteManifest) {
-        this.manifest = manifest;
+    private config: ICertSuiteConfig;
+    constructor(config: ICertSuiteConfig) {
+        this.config = config;
     }
 
     public getPrivateKey(requestContext: IRequestContext): IAsymmetricPrivateKey {
         // TODO: enhance authorization
         requestContext.authorize(SecretAuthorization.Action.readSecret, Authorization.Resource.readPrivateKey);
-        let manifest = ManifestRepo.loadManifest<IAsymmetricPrivateKeyManifest>(this.manifest.privateKeyId);
+        let manifest = ManifestRepo.loadManifest<IAsymmetricPrivateKeyManifest>(this.config.privateKeyId);
         return loadPrivateKeyFromManifest(requestContext, manifest);
     }
 
     public getCertificate(): IRootCaCert {
-        let manifest = ManifestRepo.loadManifest<IRootCaCertManifest>(this.manifest.certId);
+        let manifest = ManifestRepo.loadManifest<IRootCaCertManifest>(this.config.certId);
         return new RootCaCert.RootCaCert(manifest);
     }
 }
@@ -103,21 +98,19 @@ export module BuiltInCaCertSuites {
     const caPath = certDirPath.path("ca.json");
     const dbCaPath = certDirPath.path("db-ca.json");
 
-    export function getCaCertSuiteManifest(): CaCertSuiteManifest {
-        return require(caPath.fsPath) as CaCertSuiteManifest;
+    export function getCaCertSuiteConfig(): ICertSuiteConfig {
+        return require(caPath.fsPath) as ICertSuiteConfig;
     }
 
-    export function getDbCaCertSuiteManifest(): CaCertSuiteManifest {
-        return require(dbCaPath.fsPath) as CaCertSuiteManifest;
+    export function getDbCaCertSuiteConfig(): ICertSuiteConfig {
+        return require(dbCaPath.fsPath) as ICertSuiteConfig;
     }
 
-    export function setCaCertSuiteManifest(suite: CaCertSuiteManifest): void {
-        caPath.ensureDirExists()
-            .saveJsonConfig(suite);
+    export function setCaCertSuiteConfig(suite: ICertSuiteConfig): void {
+        caPath.ensureDirExists().saveJsonConfig(suite);
     }
 
-    export function setDbCaCertSuiteManifest(suite: CaCertSuiteManifest): void {
-        dbCaPath.ensureDirExists()
-            .saveJsonConfig(suite);
+    export function setDbCaCertSuiteConfig(suite: ICertSuiteConfig): void {
+        dbCaPath.ensureDirExists().saveJsonConfig(suite);
     }
 }

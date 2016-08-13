@@ -8,6 +8,11 @@ export interface CertSubjectConfig {
     emailAddress: string;
 }
 
+export interface CertConfig {
+    subject: CertSubjectConfig;
+    days: number;
+}
+
 export class CertSubject {
     country: string;
     stateOrProviceName: string;
