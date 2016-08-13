@@ -18,8 +18,10 @@ import { IRequestContext } from "../request-context";
 
 module BuiltInUserEntityIds {
     export const rootUserId: Guid = new Guid("36363225-cd25-42aa-a2db-8b4f2c8d877f");
+    export const dbServerUserId: Guid = new Guid("acc1592f-7cda-4d3c-a5ee-b12b0ea6b687");
 
     export const rootUserGroupId: Guid = new Guid("b170b87a-516e-4e84-b1cb-1996c06d03e1");
+    export const dbServerGroupId: Guid = new Guid("0e75512f-c9f5-438b-ab37-1ab5b8a0714c");
 }
 
 namespace BuiltInUserEntities {
@@ -74,27 +76,32 @@ namespace BuiltInUserEntities {
         }
     }
 
-    function createRootUserAndGroup(): {
-        user: BuiltInUser,
-        group: BuiltInUserGroup
-    } {
-        let user = new BuiltInUser(BuiltInUserEntityIds.rootUserId, "root@root");
-        let group = new BuiltInUserGroup(BuiltInUserEntityIds.rootUserGroupId, "root");
+    export const systemUserGroup: BuiltInUserGroup = new BuiltInUserGroup(BuiltInUserEntityIds.rootUserGroupId, "system");
 
-        user._addToGroup(group);
-        group._addMember(user);
+    export function createRootUser(): BuiltInUser {
+        let user = new BuiltInUser(BuiltInUserEntityIds.rootUserId, "root@system");
+
+        user._addToGroup(systemUserGroup);
+        systemUserGroup._addMember(user);
 
         // attach user and group policies
         user.policies = [BuiltinPolicies.allowAll];
-        group.policies = [BuiltinPolicies.allowAll];
 
-        return {
-            user: user,
-            group: group
-        };
+        return user;
     }
 
-    export const rootUserAndGroup = createRootUserAndGroup();
+    export function createDbServerUser(): BuiltInUser {
+        let user = new BuiltInUser(BuiltInUserEntityIds.dbServerUserId, "db-server@system");
+
+        user._addToGroup(systemUserGroup);
+        systemUserGroup._addMember(user);
+
+        // attach user and group policies
+        user.policies = [BuiltinPolicies.allowAll];
+
+        return user;
+    }
 }
 
-export const rootUser: IUser = BuiltInUserEntities.rootUserAndGroup.user;
+export const rootUser: IUser = BuiltInUserEntities.createRootUser();
+export const dbServerUser: IUser = BuiltInUserEntities.createDbServerUser();

@@ -26,12 +26,12 @@ export module Authorization {
     }
 }
 
+interface IRootCaCertManifest extends ICertManifest { }
 export interface IRootCaCert extends ICert { }
 
 namespace RootCaCert {
-    interface IRootCaCertManifest extends ICertManifest { }
 
-    class RootCaCert extends CertBase<IRootCaCertManifest> implements IRootCaCert {
+    export class RootCaCert extends CertBase<IRootCaCertManifest> implements IRootCaCert {
         constructor(manifest: IRootCaCertManifest) {
             super(manifest);
         }
@@ -76,6 +76,7 @@ export interface CaCertSuiteManifest {
 
 export interface ICaCertSuite {
     getPrivateKey(requestContext: IRequestContext): IAsymmetricPrivateKey;
+    getCertificate(): IRootCaCert;
 }
 
 export class CaCertSuite implements ICaCertSuite {
@@ -89,6 +90,11 @@ export class CaCertSuite implements ICaCertSuite {
         requestContext.authorize(SecretAuthorization.Action.readSecret, Authorization.Resource.readPrivateKey);
         let manifest = ManifestRepo.loadManifest<IAsymmetricPrivateKeyManifest>(this.manifest.privateKeyId);
         return loadPrivateKeyFromManifest(requestContext, manifest);
+    }
+
+    public getCertificate(): IRootCaCert {
+        let manifest = ManifestRepo.loadManifest<IRootCaCertManifest>(this.manifest.certId);
+        return new RootCaCert.RootCaCert(manifest);
     }
 }
 

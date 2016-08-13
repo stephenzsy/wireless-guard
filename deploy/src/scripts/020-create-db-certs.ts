@@ -20,12 +20,12 @@ const dbServerSubjectConfig = AppContext.getConfig<CertSubject.CertSubjectConfig
 
 const certSubject = new CertSubject.CertSubject(certSubjectConfig, dbServerSubjectConfig);
 
-const rootUserContext = RequestContext.newUserRequestContext(BuiltInUserEntities.rootUser);
+const dbServerUserContext = RequestContext.newUserRequestContext(BuiltInUserEntities.dbServerUser);
 
 async function configureRsaCertificate() {
-    let privateKey = await PrivateKey.createNewRsaPrivateKeyAsync(rootUserContext);
+    let privateKey = await PrivateKey.createNewRsaPrivateKeyAsync(dbServerUserContext);
     let caSuiteManifest = CaCert.BuiltInCaCertSuites.getDbCaCertSuiteManifest();
-    ServerCert.createServerCertAsync(rootUserContext, privateKey, caSuiteManifest, certSubject.subject);
+    ServerCert.createServerCertAsync(dbServerUserContext, privateKey, caSuiteManifest, certSubject.subject);
 }
 
 async function execute() {
