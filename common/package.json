@@ -13,7 +13,7 @@
     "url": "https://stepzsy.visualstudio.com/DefaultCollection/_git/wireless-guard"
   },
   "devDependencies": {
-    "del": "^2.2.1",
+    "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-tslint": "^6.0.2",
     "gulp-typescript": "^2.13.6",
