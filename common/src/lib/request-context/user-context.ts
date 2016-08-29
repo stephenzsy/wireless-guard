@@ -1,36 +1,25 @@
 import {
-    IUserEntity
-} from "../users/user-entity";
+    IUser,
+    IUserGroup
+} from "../users";
+import User from "../users/user";
+import UserGroup from "../users/user-group";
 import {
-    UserBase,
-    IUser
-} from "../users/user";
+    IPolicyReference,
+    PolicyEntityIdentifier
+} from "../policies";
 import {
-    IUserGroup,
-    UserGroupBase
-} from "../users/user-group";
-import {
-    rootUser
-} from "../users/builtin-user-entities";
-import {
-    IPolicy,
-    PolicyEffect,
-} from "../policies/policy";
-
-export interface IUserContext {
-    user: IUser;
-    groups?: IUserGroup[];
-    evalPolicies(action: string, resource: string): IPolicy;
-}
+    IUserContext
+} from "./request-context-interface";
 
 export class UserContext implements IUserContext {
-    private _user: IUser;
-    private _groups: IUserEntity[];
+    private _user: User;
+    private _groups: UserGroup[];
 
-    constructor(user: IUser, resolveGroups: boolean = false) {
+    constructor(user: User, resolveGroups: boolean = false) {
         this._user = user;
         if (resolveGroups) {
-            this._groups = user.getMemberGroups();
+            this._groups = user.groups;
         }
     }
 
@@ -42,16 +31,17 @@ export class UserContext implements IUserContext {
         return this._groups;
     }
 
-    public evalPolicies(action: string, resource: string): IPolicy {
-        let policy = this.user.evalPolicies(action, resource);
-        if (policy && (policy.effect === PolicyEffect.Allow || policy.effect === PolicyEffect.Deny)) {
-            return policy;
+    public evalPolicies(action: string, resource: PolicyEntityIdentifier): IPolicyReference {
+        let result = this._user.evalPolicies(action, resource);
+        if (result) {
+            return result;
         }
+
         if (this.groups) {
-            for (let group of this.groups) {
-                policy = group.evalPolicies(action, resource);
-                if (policy && (policy.effect === PolicyEffect.Allow || policy.effect === PolicyEffect.Deny)) {
-                    return policy;
+            for (let group of this._groups) {
+                result = group.evalPolicies(action, resource);
+                if (result) {
+                    return result;
                 }
             }
         }

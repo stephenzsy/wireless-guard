@@ -15,7 +15,7 @@ module BuiltInUserEntityIds {
 }
 
 namespace DeploymentUserEntities {
-    class BuiltInUser extends UserBase {
+    class BuiltInUser extends Users.User.UserBase {
         private groups: IDictionaryStringTo<BuiltInUserGroup> = {};
 
         /**

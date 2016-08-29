@@ -41,6 +41,10 @@ export class Guid {
         return this.guidStr;
     }
 
+    public equals(other: Guid): boolean {
+        return this.guidStr === other.guidStr;
+    }
+
     private static validateGuid(guidString: string): boolean {
         if (guidString.length !== 36) {
             return false;

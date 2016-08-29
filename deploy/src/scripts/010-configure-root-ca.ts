@@ -1,7 +1,7 @@
 import {
     AppContext,
     ConfigPath,
-    BuiltInUserEntities,
+    Users,
     PrivateKey,
     RequestContext,
     CaCert,
@@ -16,7 +16,7 @@ const caConfigPath = AppContext.getSettingsConfigPath().path("cert", "ca.json");
 const certConfig = AppContext.getConfig<CertCreateContext.CertConfig>(caConfigPath);
 const certSubject = new CertCreateContext.CertSubject(certConfig.subject);
 
-const rootUserContext = RequestContext.newUserRequestContext(BuiltInUserEntities.rootUser);
+const rootUserContext = RequestContext.newUserRequestContext(Users.BuiltInUserEntities.rootUser);
 
 async function configureEcCertificate() {
     let privateKey = await PrivateKey.createNewEcPrivateKeyAsync(rootUserContext);

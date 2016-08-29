@@ -1,19 +1,15 @@
 import {
-    IUserEntity,
     UserEntityBase
-} from "./user-entity";
+} from "./user-entity-base";
 import {
-    IPolicy,
-} from "../policies/policy";
-import {
+    IUser,
     IUserGroup
-} from "./user-group";
+} from "./user-interface"
+import UserGroup from "./user-group";
 import Guid from "../common/guid";
 
-export interface IUser extends IUserEntity {
-    getMemberGroups(): IUserGroup[];
-}
-
-export abstract class UserBase extends UserEntityBase implements IUser {
-    public abstract getMemberGroups(): IUserGroup[];
+export default class User extends UserEntityBase implements IUser {
+    public get groups(): UserGroup[] {
+        return [];
+    }
 }
