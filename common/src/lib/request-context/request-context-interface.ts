@@ -12,6 +12,7 @@ import {
 } from "../errors";
 
 export type LogLevel = "info" | "debug";
+export type ModuleName = "deploy";
 
 export interface AuthorizeOptions {
     requireElevated?: boolean;
@@ -26,6 +27,7 @@ export interface IUserContext {
 
 export interface IRequestContext {
     requestId: Guid;
+    moduleName: ModuleName;
     userContext: IUserContext;
     authorize(action: string, resource: PolicyEntityIdentifier, options?: AuthorizeOptions): IPolicyReference;
     log(level: LogLevel, message: string);

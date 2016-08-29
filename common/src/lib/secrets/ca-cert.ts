@@ -1,29 +1,40 @@
 import {
     ISecret,
-    SecretBase,
-    Authorization as SecretAuthorization
-} from "./secret"
+    IManifest
+} from "./secret-interface"
+import SecretBase, { AuthorizationConstants } from "./secret-base";
 import {
-    IUser
-} from "../users/user";
+    IdentifierType,
+    IPolicyReference
+} from "../policies"
+import Policy from "../policies/policy";
+import {
+    IUser,
+    AuthorizationConstants as UsersAuthorizationConstants
+} from "../users";
 import AppContext from "../app-context";
 import {
-    IRequestContext
+    IRequestContext,
+    PolicyDeniedError
 } from "../request-context";
 import Guid from "../common/guid";
-import { IManifest } from "./manifest";
 import ManifestRepo from "./manifest-repo";
 import WGOpenssl from "wireless-guard-openssl";
 import ConfigPath from "../config/config-path";
 import * as moment from "moment";
-import { IAsymmetricPrivateKey, IAsymmetricPrivateKeyManifest, loadPrivateKeyFromManifest } from "./private-key";
+import {
+    IAsymmetricPrivateKey,
+    IAsymmetricPrivateKeyManifest,
+    loadPrivateKeyFromManifest,
+    Authorization as PrivateKeyAuthorizationConstants
+} from "./private-key";
 import { CertBase, ICert, ICertManifest, getGuidSerial, ICertSuiteConfig } from "./cert-base";
+import {
+    toPolicyReference
+} from "../policies/utils";
 
-export module Authorization {
-    export module Resource {
-        export const createRootCa: string = "secret:root-ca::";
-        export const readPrivateKey: string = "secret:private-key::";
-    }
+namespace Authorization {
+    export const typeRootCa: string = "root-ca";
 }
 
 interface IRootCaCertManifest extends ICertManifest { }
@@ -40,9 +51,17 @@ namespace RootCaCert {
     export async function createRootCaCertAsync(requestContext: IRequestContext,
         privateKey: IAsymmetricPrivateKey,
         subject: string): Promise<RootCaCert> {
-        requestContext.authorize(SecretAuthorization.Action.createSecret, Authorization.Resource.createRootCa);
+        requestContext.authorize(
+            AuthorizationConstants.Action.createSecret,
+            {
+                type: Authorization.typeRootCa,
+                identifierType: IdentifierType.Id,
+                identifier: "*"
+            },
+            { requireElevated: true });
 
-        let manifest: IRootCaCertManifest = ManifestRepo.initManifest(requestContext.userContext.user) as IRootCaCertManifest;
+        let manifest: IRootCaCertManifest = ManifestRepo.initManifest(requestContext.userContext.user,
+            requestContext.moduleName) as IRootCaCertManifest;
         // expiry to be actual expiry - 1 day
         let expiryDateStr: string = moment.utc().add({ days: 364 }).toISOString();
         manifest.expireAt = expiryDateStr;
@@ -71,7 +90,7 @@ export const createRootCaCertAsync: (requestContext: IRequestContext,
 
 export interface ICaCertSuite {
     getPrivateKey(requestContext: IRequestContext): IAsymmetricPrivateKey;
-    getCertificate(): IRootCaCert;
+    getCertificate(requestContext: IRequestContext): IRootCaCert;
 }
 
 export class CaCertSuite implements ICaCertSuite {
@@ -81,14 +100,55 @@ export class CaCertSuite implements ICaCertSuite {
     }
 
     public getPrivateKey(requestContext: IRequestContext): IAsymmetricPrivateKey {
+        requestContext.authorize(
+            AuthorizationConstants.Action.readSecret,
+            {
+                type: PrivateKeyAuthorizationConstants.typePrivateKey,
+                identifierType: IdentifierType.Id,
+                identifier: "*"
+            },
+            { requireElevated: true });
         // TODO: enhance authorization
-        requestContext.authorize(SecretAuthorization.Action.readSecret, Authorization.Resource.readPrivateKey);
-        let manifest = ManifestRepo.loadManifest<IAsymmetricPrivateKeyManifest>(this.config.privateKeyId);
+
+        let manifest = ManifestRepo.loadManifest<IAsymmetricPrivateKeyManifest>(this.config.privateKeyId, requestContext.moduleName);
+        let authPolicy = CaCertSuite.authorizeAccessPrivateKey(requestContext, manifest);
+        if (!authPolicy || !authPolicy.allow) {
+            throw new PolicyDeniedError(authPolicy);
+        }
         return loadPrivateKeyFromManifest(requestContext, manifest);
     }
 
-    public getCertificate(): IRootCaCert {
-        let manifest = ManifestRepo.loadManifest<IRootCaCertManifest>(this.config.certId);
+    private static authorizeAccessPrivateKey(requestContext: IRequestContext, manifest: IManifest): IPolicyReference {
+        for (let policyDefinition of manifest.policies) {
+            let policy = new Policy(policyDefinition);
+            if (policy.match(
+                AuthorizationConstants.Action.readSecret,
+                {
+                    type: UsersAuthorizationConstants.typeUser,
+                    identifierType: IdentifierType.Id,
+                    identifier: requestContext.userContext.user.id.toString()
+                },
+                {
+                    type: PrivateKeyAuthorizationConstants.typePrivateKey,
+                    identifierType: IdentifierType.Id,
+                    identifier: manifest.id
+                }
+            )) {
+                return toPolicyReference(policy);
+            }
+        }
+    }
+
+    public getCertificate(requestContext: IRequestContext): IRootCaCert {
+        requestContext.authorize(
+            AuthorizationConstants.Action.readSecret,
+            {
+                type: Authorization.typeRootCa,
+                identifierType: IdentifierType.Id,
+                identifier: "*"
+            },
+            { requireElevated: true });
+        let manifest = ManifestRepo.loadManifest<IRootCaCertManifest>(this.config.certId, requestContext.moduleName);
         return new RootCaCert.RootCaCert(manifest);
     }
 }

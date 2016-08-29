@@ -16,8 +16,12 @@ var AppContext;
         return new config_path_1.default(settingsConfigDir);
     }
     AppContext.getSettingsConfigPath = getSettingsConfigPath;
-    function getInstanceConfigPath() {
-        return new config_path_1.default(instanceConfigDir);
+    function getInstanceConfigPath(moduleName) {
+        let path = new config_path_1.default(instanceConfigDir);
+        if (moduleName) {
+            path = path.path(moduleName);
+        }
+        return path;
     }
     AppContext.getInstanceConfigPath = getInstanceConfigPath;
     function getConfig(path) {

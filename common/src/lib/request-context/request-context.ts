@@ -8,7 +8,8 @@ import {
     ElevatedRequestContextRequiredError,
     PolicyDeniedError,
     AuthorizeOptions,
-    LogLevel
+    LogLevel,
+    ModuleName
 } from "./request-context-interface";
 import {
     UserContext
@@ -23,6 +24,7 @@ import User from "../users/user";
 class RequestContext implements IRequestContext {
     private _requestId: Guid;
     public userContext: IUserContext;
+    public moduleName: ModuleName;
     private isElevated: boolean;
 
     constructor(original?: RequestContext, isElevated: boolean = false) {
@@ -67,8 +69,9 @@ class RequestContext implements IRequestContext {
     }
 }
 
-export function newUserRequestContext(user: User, resolveGroups: boolean = true): IRequestContext {
+export function newUserRequestContext(moduleName: ModuleName, user: User, resolveGroups: boolean = true): IRequestContext {
     let requestContext = new RequestContext();
+    requestContext.moduleName = moduleName;
     requestContext.userContext = new UserContext(user, resolveGroups);
     return requestContext;
 }

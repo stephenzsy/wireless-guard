@@ -8,14 +8,9 @@ import {
     PolicyEntityIdentifier,
     IdentifierType,
 } from "../policies";
-
-function toPolicyReference(policy: IPolicy): IPolicyReference {
-    return {
-        id: policy.id,
-        name: policy.name,
-        allow: policy.allow
-    };
-}
+import {
+    toPolicyReference
+} from "../policies/utils";
 
 export abstract class UserEntityBase implements IUserEntity {
     private _id: Guid;

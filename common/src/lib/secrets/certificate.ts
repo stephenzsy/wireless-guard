@@ -5,8 +5,8 @@ import WGOpenssl from "wireless-guard-openssl";
 import Guid from "../common/guid";
 import AppContext from "../app-context";
 import {
-    Authorization as SecretAuthorization
-} from "./secret";
+    AuthorizationConstants
+} from "./secret-base";
 import { CertBase, ICert, ICertManifest, getGuidSerial, ICertSuiteConfig } from "./cert-base";
 import {
     IRequestContext
@@ -17,12 +17,11 @@ import {
 } from "./ca-cert";
 import ManifestRepo from "./manifest-repo";
 import ConfigPath from "../config/config-path";
+import { IdentifierType } from "../policies";
 
 export module Authorization {
-    export module Resource {
-        export const createServerCert: string = "secret:server-cert::";
-        export const createClientCert: string = "secret:client-cert::";
-    }
+    export const typeServerCert: string = "server-cert";
+    export const typeClientCert: string = "client-cert";
 }
 
 export interface ICertificate extends ICert { }
@@ -47,7 +46,7 @@ namespace Certs {
         });
     }
 
-    export async function createCertAsync(requestContext: IRequestContext,
+    async function createCertAsync(requestContext: IRequestContext,
         manifest: ICertificateManifest,
         privateKey: IAsymmetricPrivateKey,
         caCertSuiteConfig: ICertSuiteConfig,
@@ -55,7 +54,6 @@ namespace Certs {
         subject: string,
         subjectAltDnsNames: string[],
         subjectAltIps: string[]): Promise<Cert> {
-        requestContext.authorize(SecretAuthorization.Action.createSecret, Authorization.Resource.createServerCert);
 
         let dirPath: ConfigPath = new ConfigPath(manifest.secretsDirPath);
         // create csr
@@ -79,7 +77,7 @@ namespace Certs {
         manifest.expireAt = moment.utc().add({ days: days }).toISOString();
         manifest.pemFilePath = crtPath.fsPath;
         let caChainPath: ConfigPath = dirPath.path("chain.pem");
-        fsExtra.copySync(caSuite.getCertificate().pemFilePath.fsPath, caChainPath.fsPath);
+        fsExtra.copySync(caSuite.getCertificate(requestContext).pemFilePath.fsPath, caChainPath.fsPath);
         manifest.caChainPemFilePath = caChainPath.fsPath;
         new ConfigPath(manifest.manifestPath).saveJsonConfig(manifest);
         requestContext.log("info", "Created server certificate: " + manifest.id);
@@ -124,8 +122,16 @@ namespace Certs {
         subject: string,
         subjectAltDnsNames: string[],
         subjectAltIps: string[]): Promise<Cert> {
-        requestContext.authorize(SecretAuthorization.Action.createSecret, Authorization.Resource.createServerCert);
-        let manifest: ICertificateManifest = ManifestRepo.initManifest(requestContext.userContext.user) as ICertificateManifest;
+        requestContext.authorize(
+            AuthorizationConstants.Action.createSecret,
+            {
+                type: Authorization.typeServerCert,
+                identifierType: IdentifierType.Id,
+                identifier: "*"
+            },
+            { requireElevated: true });
+        let manifest: ICertificateManifest = ManifestRepo.initManifest(requestContext.userContext.user,
+            requestContext.moduleName) as ICertificateManifest;
         return createCertAsync(requestContext,
             manifest,
             privateKey,
@@ -144,8 +150,16 @@ namespace Certs {
         subject: string,
         subjectAltDnsNames: string[],
         subjectAltIps: string[]): Promise<Cert> {
-        requestContext.authorize(SecretAuthorization.Action.createSecret, Authorization.Resource.createServerCert);
-        let manifest: ICertificateManifest = ManifestRepo.initManifest(requestContext.userContext.user, configPath) as ICertificateManifest;
+        requestContext.authorize(
+            AuthorizationConstants.Action.createSecret,
+            {
+                type: Authorization.typeClientCert,
+                identifierType: IdentifierType.Id,
+                identifier: "*"
+            },
+            { requireElevated: true });
+        let manifest: ICertificateManifest = ManifestRepo.initManifest(requestContext.userContext.user,
+            requestContext.moduleName) as ICertificateManifest;
         return createCertAsync(requestContext,
             manifest,
             privateKey,
@@ -186,7 +200,7 @@ namespace Certs {
             extfile: extFilePath.fsPath,
             extensions: "v3_req",
             CAKey: caCertSuite.getPrivateKey(caOwnerRequestContext).pemFilePath.fsPath,
-            CA: caCertSuite.getCertificate().pemFilePath.fsPath,
+            CA: caCertSuite.getCertificate(caOwnerRequestContext).pemFilePath.fsPath,
             days: days
         });
     }

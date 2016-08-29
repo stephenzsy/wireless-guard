@@ -16,7 +16,7 @@ function toPolicyEffectAllow(value: string): boolean {
     return "allow" === value;
 }
 
-export class Policy implements IPolicy {
+export default class Policy implements IPolicy {
     private _id: Guid;
     private _name: string;
     private _allow: boolean;

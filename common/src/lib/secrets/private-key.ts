@@ -1,27 +1,21 @@
 import {
     ISecret,
-    SecretBase
-} from "./secret"
+    IManifest,
+} from "./secret-interface";
+import SecretBase, { AuthorizationConstants } from "./secret-base";
 import {
-    IUser
-} from "../users/user";
+    IdentifierType
+} from "../policies"
 import {
     IRequestContext
 } from "../request-context";
 import Guid from "../common/guid";
-import { IManifest } from "./manifest";
 import ManifestRepo from "./manifest-repo";
 import { WGOpenssl } from "wireless-guard-openssl";
 import ConfigPath from "../config/config-path";
 
 export module Authorization {
-    export module Action {
-        export const createPrivateKey: string = "create";
-    }
-
-    export module Resource {
-        export const createPrivateKey: string = "secret:private-key::";
-    }
+    export const typePrivateKey: string = "private-key";
 }
 
 export interface IAsymmetricPrivateKey extends ISecret {
@@ -52,10 +46,22 @@ namespace AsymmetricPrivateKey {
         }
     }
 
-    export async function createNewEcPrivateKeyAsync(requestContext: IRequestContext): Promise<EcPrivateKey> {
-        requestContext.authorize(Authorization.Action.createPrivateKey, Authorization.Resource.createPrivateKey);
+    function authorizeCreatePrivateKeyRequest(requestContext: IRequestContext) {
+        requestContext.authorize(
+            AuthorizationConstants.Action.createSecret,
+            {
+                type: Authorization.typePrivateKey,
+                identifierType: IdentifierType.Id,
+                identifier: "*"
+            },
+            { requireElevated: true });
+    }
 
-        let manifest: IEcManifest = ManifestRepo.initManifest(requestContext.userContext.user) as IEcManifest;
+    export async function createNewEcPrivateKeyAsync(requestContext: IRequestContext): Promise<EcPrivateKey> {
+        authorizeCreatePrivateKeyRequest(requestContext);
+
+        let manifest: IEcManifest = ManifestRepo.initManifest(requestContext.userContext.user,
+            requestContext.moduleName) as IEcManifest;
         manifest.algorithm = "ec";
         manifest.curve = "secp384r1";
         let privateKeyPath = new ConfigPath(manifest.secretsDirPath).path("key.pem");
@@ -79,11 +85,11 @@ namespace AsymmetricPrivateKey {
         }
     }
 
-    export async function createNewRsaPrivateKeyAsync(requestContext: IRequestContext,
-        configPath?: ConfigPath): Promise<RsaPrivateKey> {
-        requestContext.authorize(Authorization.Action.createPrivateKey, Authorization.Resource.createPrivateKey);
+    export async function createNewRsaPrivateKeyAsync(requestContext: IRequestContext): Promise<RsaPrivateKey> {
+        authorizeCreatePrivateKeyRequest(requestContext);
 
-        let manifest: IRsaManifest = ManifestRepo.initManifest(requestContext.userContext.user, configPath) as IRsaManifest;
+        let manifest: IRsaManifest = ManifestRepo.initManifest(requestContext.userContext.user,
+            requestContext.moduleName) as IRsaManifest;
         manifest.algorithm = "rsa";
         manifest.numbits = 4096;
         let privateKeyPath = new ConfigPath(manifest.secretsDirPath).path("key.pem");
@@ -108,9 +114,8 @@ export function createNewEcPrivateKeyAsync(requestContext: IRequestContext): Pro
     return AsymmetricPrivateKey.createNewEcPrivateKeyAsync(requestContext);
 }
 
-export function createNewRsaPrivateKeyAsync(requestContext: IRequestContext,
-    configPath?: ConfigPath): Promise<IAsymmetricPrivateKey> {
-    return AsymmetricPrivateKey.createNewRsaPrivateKeyAsync(requestContext, configPath);
+export function createNewRsaPrivateKeyAsync(requestContext: IRequestContext): Promise<IAsymmetricPrivateKey> {
+    return AsymmetricPrivateKey.createNewRsaPrivateKeyAsync(requestContext);
 }
 
 export function loadPrivateKeyFromManifest(requestContext: IRequestContext, manifest: IAsymmetricPrivateKeyManifest): IAsymmetricPrivateKey {

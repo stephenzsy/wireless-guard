@@ -3,7 +3,9 @@ import {
     PolicyDefinitionMatch,
     IdentifierType,
     toIdentifierType,
-    PolicyEntityIdentifier
+    PolicyEntityIdentifier,
+    IPolicy,
+    IPolicyReference
 } from "./policy-interface";
 
 export type MatchWithAllDefinition<T> = "*" | T;
@@ -136,4 +138,12 @@ export function newPolicyDefinitionMatcher(matchDefinition: PolicyDefinitionMatc
 
 export function newMultipleStringsMatcher(matchDefinition: PolicyDefinitionMatch): IMatcher<string> {
     return new MultipleStringsMatcher(matchDefinition);
+}
+
+export function toPolicyReference(policy: IPolicy): IPolicyReference {
+    return {
+        id: policy.id,
+        name: policy.name,
+        allow: policy.allow
+    };
 }

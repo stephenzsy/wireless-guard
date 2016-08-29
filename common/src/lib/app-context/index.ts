@@ -21,8 +21,12 @@ export module AppContext {
         return new ConfigPath(settingsConfigDir);
     }
 
-    export function getInstanceConfigPath(): ConfigPath {
-        return new ConfigPath(instanceConfigDir);
+    export function getInstanceConfigPath(moduleName?: string): ConfigPath {
+        let path = new ConfigPath(instanceConfigDir);
+        if (moduleName) {
+            path = path.path(moduleName);
+        }
+        return path;
     }
 
     export function getConfig<T>(path: ConfigPath): T {

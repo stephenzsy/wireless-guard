@@ -1,10 +1,8 @@
 import {
+    ISecret,
     IManifest
-} from "./manifest";
-import {
-    SecretBase,
-    ISecret
-} from "./secret";
+} from "./secret-interface";
+import SecretBase from "./secret-base";
 import Guid from "../common/guid";
 import ConfigPath from "../config/config-path";
 
