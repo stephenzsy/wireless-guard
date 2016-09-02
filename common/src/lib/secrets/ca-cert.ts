@@ -108,7 +108,6 @@ export class CaCertSuite implements ICaCertSuite {
                 identifier: "*"
             },
             { requireElevated: true });
-        // TODO: enhance authorization
 
         let manifest = ManifestRepo.loadManifest<IAsymmetricPrivateKeyManifest>(this.config.privateKeyId, requestContext.moduleName);
         let authPolicy = CaCertSuite.authorizeAccessPrivateKey(requestContext, manifest);
@@ -150,27 +149,5 @@ export class CaCertSuite implements ICaCertSuite {
             { requireElevated: true });
         let manifest = ManifestRepo.loadManifest<IRootCaCertManifest>(this.config.certId, requestContext.moduleName);
         return new RootCaCert.RootCaCert(manifest);
-    }
-}
-
-export module BuiltInCaCertSuites {
-    const certDirPath = AppContext.getInstanceConfigPath().path("certs");
-    const caPath = certDirPath.path("ca.json");
-    const dbCaPath = certDirPath.path("db-ca.json");
-
-    export function getCaCertSuiteConfig(): ICertSuiteConfig {
-        return require(caPath.fsPath) as ICertSuiteConfig;
-    }
-
-    export function getDbCaCertSuiteConfig(): ICertSuiteConfig {
-        return require(dbCaPath.fsPath) as ICertSuiteConfig;
-    }
-
-    export function setCaCertSuiteConfig(suite: ICertSuiteConfig): void {
-        caPath.ensureDirExists().saveJsonConfig(suite);
-    }
-
-    export function setDbCaCertSuiteConfig(suite: ICertSuiteConfig): void {
-        dbCaPath.ensureDirExists().saveJsonConfig(suite);
     }
 }

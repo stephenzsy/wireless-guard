@@ -16,12 +16,12 @@ export module SecretManifiestRepository {
         }
     }
 
-    function getManifestDirectory(moduleName: string): ConfigPath {
+    function getManifestDirectory(moduleName: AppContext.ModuleName): ConfigPath {
         return AppContext.getInstanceConfigPath(moduleName)
             .path(secretsDir);
     }
 
-    export function initManifest(owner: IUser, moduleName: string): IManifest {
+    export function initManifest(owner: IUser, moduleName: AppContext.ModuleName): IManifest {
         let id = new Guid();
         let secretDirPath = getManifestDirectory(moduleName)
             .path(id.toString());
@@ -37,7 +37,7 @@ export module SecretManifiestRepository {
         return manifest;
     }
 
-    export function loadManifest<T extends IManifest>(id: string, moduleName: string): T {
+    export function loadManifest<T extends IManifest>(id: string, moduleName: AppContext.ModuleName): T {
         let secretDirPath = getManifestDirectory(moduleName)
             .path(id.toString());
         let manifestPath = secretDirPath.path(manifestFilename);

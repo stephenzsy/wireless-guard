@@ -11,17 +11,16 @@ import {
     LogLevel,
     ModuleName
 } from "./request-context-interface";
-import {
-    UserContext
-} from "./user-context";
+import UserContext from "./user-context";
 import {
     IPolicy,
     IPolicyReference,
     PolicyEntityIdentifier,
 } from "../policies";
+import { IUser } from "../users"
 import User from "../users/user";
 
-class RequestContext implements IRequestContext {
+export default class RequestContext implements IRequestContext {
     private _requestId: Guid;
     public userContext: IUserContext;
     public moduleName: ModuleName;
@@ -67,11 +66,4 @@ class RequestContext implements IRequestContext {
     public elevate(): IRequestContext {
         return new RequestContext(this, true);
     }
-}
-
-export function newUserRequestContext(moduleName: ModuleName, user: User, resolveGroups: boolean = true): IRequestContext {
-    let requestContext = new RequestContext();
-    requestContext.moduleName = moduleName;
-    requestContext.userContext = new UserContext(user, resolveGroups);
-    return requestContext;
 }

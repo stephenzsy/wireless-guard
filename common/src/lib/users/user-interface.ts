@@ -2,6 +2,7 @@ import Guid from "../common/guid";
 import {
     IPolicyReference,
 } from "../policies";
+import {IRequestContext} from "../request-context";
 
 export interface IUserEntityReference {
     id: Guid;

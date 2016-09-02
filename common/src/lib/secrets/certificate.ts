@@ -236,16 +236,3 @@ export async function createClientCertAsync(requestContext: IRequestContext,
         subject,
         [], []);
 }
-
-export module BuiltInCertSuites {
-    const certDirPath = AppContext.getInstanceConfigPath().path("certs");
-    const dbServerPath = certDirPath.path("db-server.json");
-
-    export function getDbServerCertSuiteConfig(): ICertSuiteConfig {
-        return require(dbServerPath.fsPath) as ICertSuiteConfig;
-    }
-
-    export function setDbServerCertSuiteConfig(suite: ICertSuiteConfig): void {
-        dbServerPath.ensureDirExists().saveJsonConfig(suite);
-    }
-}

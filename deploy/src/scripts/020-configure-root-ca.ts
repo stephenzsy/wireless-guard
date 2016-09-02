@@ -7,6 +7,9 @@ import {
     CaCert,
     CertCreateContext
 } from "wireless-guard-common";
+import {
+    rootUser
+} from "../lib/deployment-users";
 
 if (!AppContext.hasConfig()) {
     throw "Config not available";
@@ -16,7 +19,7 @@ const caConfigPath = AppContext.getSettingsConfigPath().path("cert", "ca.json");
 const certConfig = AppContext.getConfig<CertCreateContext.CertConfig>(caConfigPath);
 const certSubject = new CertCreateContext.CertSubject(certConfig.subject);
 
-const rootUserContext = RequestContext.newUserRequestContext(Users.BuiltInUserEntities.rootUser);
+const rootUserContext = AppContext.newContributedUserRequestContext("deploy", rootUser.id);
 
 async function configureEcCertificate() {
     let privateKey = await PrivateKey.createNewEcPrivateKeyAsync(rootUserContext);

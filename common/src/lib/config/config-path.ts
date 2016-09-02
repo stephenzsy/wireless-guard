@@ -29,7 +29,11 @@ export class ConfigPath {
     }
 
     public ensureDirExists(): this {
-        fse.mkdirpSync(path.dirname(this.fsPath));
+        try {
+            let stat = fs.lstatSync(path.dirname(this.fsPath));
+        } catch (e) {
+            fse.mkdirpSync(path.dirname(this.fsPath));
+        }
         return this;
     }
 

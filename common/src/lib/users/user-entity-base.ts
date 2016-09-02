@@ -34,10 +34,16 @@ export abstract class UserEntityBase implements IUserEntity {
      * @override
      */
     public get policies(): IPolicyReference[] {
+        if (!this._policies) {
+            return null;
+        }
         return this._policies.map(toPolicyReference);
     }
 
     public evalPolicies(action: string, resource: PolicyEntityIdentifier): IPolicyReference {
+        if (!this._policies) {
+            return null;
+        }
         for (let policy of this._policies) {
             if (policy.match(action,
                 {

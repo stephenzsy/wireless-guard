@@ -12,7 +12,7 @@ import {
     IUserContext
 } from "./request-context-interface";
 
-export class UserContext implements IUserContext {
+export default class UserContext implements IUserContext {
     private _user: User;
     private _groups: UserGroup[];
 
