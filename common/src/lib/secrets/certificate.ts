@@ -7,11 +7,16 @@ import AppContext from "../app-context";
 import {
     AuthorizationConstants
 } from "./secret-base";
-import { CertBase, ICert, ICertManifest, getGuidSerial, ICertSuiteConfig } from "./cert-base";
+import { CertBase, getGuidSerial } from "./cert-base";
 import {
     IRequestContext
 } from "../request-context";
-import { IAsymmetricPrivateKey } from "./private-key";
+import {
+    IAsymmetricPrivateKey,
+    ICertificate,
+    ICertificateManifest,
+    ICertSuite
+} from "./secret-interface";
 import {
     CaCertSuite
 } from "./ca-cert";
@@ -22,11 +27,6 @@ import { IdentifierType } from "../policies";
 export module Authorization {
     export const typeServerCert: string = "server-cert";
     export const typeClientCert: string = "client-cert";
-}
-
-export interface ICertificate extends ICert { }
-export interface ICertificateManifest extends ICertManifest {
-    caChainPemFilePath: string;
 }
 
 namespace Certs {
@@ -49,11 +49,11 @@ namespace Certs {
     async function createCertAsync(requestContext: IRequestContext,
         manifest: ICertificateManifest,
         privateKey: IAsymmetricPrivateKey,
-        caCertSuiteConfig: ICertSuiteConfig,
+        caCertSuiteConfig: ICertSuite,
         days: number,
         subject: string,
-        subjectAltDnsNames: string[],
-        subjectAltIps: string[]): Promise<Cert> {
+        subjectAltDnsNames: string[] = [],
+        subjectAltIps: string[] = []): Promise<Cert> {
 
         let dirPath: ConfigPath = new ConfigPath(manifest.secretsDirPath);
         // create csr
@@ -65,12 +65,11 @@ namespace Certs {
 
         let crtPath: ConfigPath = dirPath.path("crt.pem");
         let caSuite = new CaCertSuite(caCertSuiteConfig);
-        await signCertificate(
+        await caSuite.signCertificate(
             requestContext,
             csrPath,
             crtPath,
             extPath,
-            caSuite,
             manifest.id,
             days
         );
@@ -84,7 +83,7 @@ namespace Certs {
         return new Cert(manifest);
     }
 
-    async function writeV3Ext(configPath: ConfigPath, subjectAltDnsNames: string[], subjectAltIps: string[]) {
+    async function writeV3Ext(configPath: ConfigPath, subjectAltDnsNames: string[] = [], subjectAltIps: string[] = []) {
         var lines: string[] = [
             '[ v3_req ]',
             'subjectKeyIdentifier = hash',
@@ -97,27 +96,27 @@ namespace Certs {
                 '',
                 '[ alt_names ]'
             ]);
-        }
-        {
-            let counter: number = 0;
-            subjectAltDnsNames.forEach(dnsName => {
-                ++counter;
-                lines.push('DNS.' + counter + ' = ' + dnsName);
-            });
-        }
-        {
-            let counter: number = 0;
-            subjectAltIps.forEach(ip => {
-                ++counter;
-                lines.push('IP.' + counter + ' = ' + ip);
-            });
+            {
+                let counter: number = 0;
+                subjectAltDnsNames.forEach(dnsName => {
+                    ++counter;
+                    lines.push('DNS.' + counter + ' = ' + dnsName);
+                });
+            }
+            {
+                let counter: number = 0;
+                subjectAltIps.forEach(ip => {
+                    ++counter;
+                    lines.push('IP.' + counter + ' = ' + ip);
+                });
+            }
         }
         return writeFile(configPath.fsPath, lines.join("\n"));
     }
 
     export async function createServerCertAsync(requestContext: IRequestContext,
         privateKey: IAsymmetricPrivateKey,
-        caCertSuiteConfig: ICertSuiteConfig,
+        caCertSuiteConfig: ICertSuite,
         days: number,
         subject: string,
         subjectAltDnsNames: string[],
@@ -145,11 +144,9 @@ namespace Certs {
     export async function createClientCertAsync(requestContext: IRequestContext,
         configPath: ConfigPath,
         privateKey: IAsymmetricPrivateKey,
-        caCertSuiteConfig: ICertSuiteConfig,
+        caCertSuiteConfig: ICertSuite,
         days: number,
-        subject: string,
-        subjectAltDnsNames: string[],
-        subjectAltIps: string[]): Promise<Cert> {
+        subject: string): Promise<Cert> {
         requestContext.authorize(
             AuthorizationConstants.Action.createSecret,
             {
@@ -165,9 +162,7 @@ namespace Certs {
             privateKey,
             caCertSuiteConfig,
             days,
-            subject,
-            subjectAltDnsNames,
-            subjectAltIps);
+            subject);
     }
 
     async function writeFile(path: string, content: string): Promise<void> {
@@ -181,34 +176,11 @@ namespace Certs {
             });
         });
     }
-
-    async function signCertificate(
-        caOwnerRequestContext: IRequestContext,
-        csrInputPath: ConfigPath,
-        crtOutputPath: ConfigPath,
-        extFilePath: ConfigPath,
-        caCertSuite: CaCertSuite,
-        manifestId: string,
-        days: number
-    ): Promise<void> {
-        return WGOpenssl.x509({
-            req: true,
-            in: csrInputPath.fsPath,
-            out: crtOutputPath.fsPath,
-            setSerial: getGuidSerial(new Guid(manifestId)),
-            digest: "sha384",
-            extfile: extFilePath.fsPath,
-            extensions: "v3_req",
-            CAKey: caCertSuite.getPrivateKey(caOwnerRequestContext).pemFilePath.fsPath,
-            CA: caCertSuite.getCertificate(caOwnerRequestContext).pemFilePath.fsPath,
-            days: days
-        });
-    }
 }
 
 export async function createServerCertAsync(requestContext: IRequestContext,
     privateKey: IAsymmetricPrivateKey,
-    certSuiteConfig: ICertSuiteConfig,
+    certSuiteConfig: ICertSuite,
     days: number,
     subject: string,
     subjectAltDnsNames: string[] = [],
@@ -223,7 +195,7 @@ export async function createServerCertAsync(requestContext: IRequestContext,
 
 export async function createClientCertAsync(requestContext: IRequestContext,
     privateKey: IAsymmetricPrivateKey,
-    certSuiteConfig: ICertSuiteConfig,
+    certSuiteConfig: ICertSuite,
     days: number,
     subject: string,
     configPath?: ConfigPath
@@ -233,6 +205,5 @@ export async function createClientCertAsync(requestContext: IRequestContext,
         privateKey,
         certSuiteConfig,
         days,
-        subject,
-        [], []);
+        subject);
 }

@@ -1,5 +1,7 @@
 import Guid from "../common/guid";
-import {PolicyDefinition} from "../policies";
+import ConfigPath from "../config/config-path"
+import { PolicyDefinition } from "../policies";
+
 export interface ISecret {
     id: Guid;
 }
@@ -12,5 +14,40 @@ export interface IManifest {
      */
     manifestPath: string;
     secretsDirPath: string;
-    policies: PolicyDefinition[];
+}
+
+export interface IAsymmetricPrivateKey extends ISecret {
+    pemFilePath: ConfigPath;
+}
+
+export interface IAsymmetricPrivateKeyManifest extends IManifest {
+    algorithm: "ec" | "rsa";
+    pemFilePath: string;
+}
+
+export interface ICertBase extends ISecret {
+    pemFilePath: ConfigPath;
+}
+
+export interface ICertManifestBase extends IManifest {
+    expireAt: string;
+    pemFilePath: string;
+}
+
+export interface ICertificate extends ICertBase { }
+export interface ICertificateManifest extends ICertManifestBase {
+    caChainPemFilePath: string;
+}
+
+export interface IRootCaCert extends ICertBase { }
+export interface IRootCaCertManifest extends ICertManifestBase { }
+
+export interface ICertSuite {
+    certId: Guid,
+    privateKeyId: Guid
+}
+
+export interface ICertSuiteManifest {
+    certId: string,
+    privateKeyId: string
 }

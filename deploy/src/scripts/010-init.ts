@@ -17,7 +17,9 @@ let config: DeployAppConfig = {
     deploymentId: new Guid(),
     deploymentTimestamp: new Date(),
     rootUserId: new Guid(),
-    rootUserName: "deploy@system"
+    rootUserName: "deploy@system",
+    dbUserId: new Guid(),
+    dbUserName: "db@system"
 };
 
 saveConfig(config);

@@ -4,15 +4,14 @@ import AppContext from "../app-context";
 import ConfigPath from "../config/config-path";
 import { IUser } from "../users";
 import { GeneralErrors } from "../errors";
-import { PolicyDefinition } from "../policies";
 
 export module SecretManifiestRepository {
     const secretsDir: string = "secrets";
     const manifestFilename: string = "manifest.json";
 
     export class ManifestDoesNotExistError extends GeneralErrors.ResourceNotExistError {
-        constructor(manifestId: string) {
-            super("Manifest " + manifestId + " is not found.");
+        constructor(manifestId: Guid) {
+            super(`Manifest ${manifestId.toString()} is not found.`);
         }
     }
 
@@ -30,14 +29,13 @@ export module SecretManifiestRepository {
             id: id.toString(),
             ownerId: owner.id.toString(),
             manifestPath: manifestPath.fsPath,
-            secretsDirPath: secretDirPath.fsPath,
-            policies: [createAuthorizedForUserPolicy(id, owner)]
+            secretsDirPath: secretDirPath.fsPath
         };
         manifestPath.ensureDirExists().saveJsonConfig(manifest);
         return manifest;
     }
 
-    export function loadManifest<T extends IManifest>(id: string, moduleName: AppContext.ModuleName): T {
+    export function loadManifest<T extends IManifest>(id: Guid, moduleName: AppContext.ModuleName): T {
         let secretDirPath = getManifestDirectory(moduleName)
             .path(id.toString());
         let manifestPath = secretDirPath.path(manifestFilename);
@@ -47,16 +45,6 @@ export module SecretManifiestRepository {
         }
 
         return require(manifestPath.fsPath) as T;
-    }
-
-    function createAuthorizedForUserPolicy(manifestId: Guid, user: IUser): PolicyDefinition {
-        return {
-            id: new Guid().toString(),
-            name: "manifest-owner-access-" + manifestId.toString(),
-            actions: "*",
-            effect: "allow",
-            users: ["user:id:" + user.id.toString()]
-        };
     }
 }
 

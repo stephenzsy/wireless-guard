@@ -5,6 +5,8 @@ import ConfigPath from "../config/config-path";
 import { IUser } from "../users";
 import UserContributions from "../users/contributions";
 import { IRequestContext } from "../request-context";
+import { IPolicy, PolicyDefinition } from "../policies";
+import Policy from "../policies/policy";
 import RequestContext from "../request-context/request-context";
 import UserContext from "../request-context/user-context";
 
@@ -94,14 +96,24 @@ export module AppContext {
         return path.loadJsonConfig() as T;
     }
 
+    export function contributePolicy(policyDefinition: PolicyDefinition): IPolicy {
+        return new Policy(policyDefinition);
+    }
+
     const contributedUsers: Map<ModuleName, UserContributions> = new Map();
-    export function contributeUser(moduleName: ModuleName, userId: Guid, userName: string): IUser {
+    export function contributeUser(
+        moduleName: ModuleName,
+        userId: Guid,
+        userName: string,
+        policies: IPolicy[]): IUser {
         let contributions = contributedUsers.get(moduleName);
         if (!contributions) {
             contributions = new UserContributions();
             contributedUsers.set(moduleName, contributions);
         }
-        return contributions.contributeUser(userId, userName);
+        let user = contributions.contributeUser(userId, userName);
+        user.setPolicies(policies);
+        return user;
     }
 
     export function newContributedUserRequestContext(moduleName: ModuleName, userId: Guid, resolveGroups: boolean = true): IRequestContext {

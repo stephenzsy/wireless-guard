@@ -30,6 +30,7 @@ export default class RequestContext implements IRequestContext {
         if (original) {
             this._requestId = original.requestId;
             this.userContext = original.userContext;
+            this.moduleName = original.moduleName;
         } else {
             this._requestId = new Guid();
         }

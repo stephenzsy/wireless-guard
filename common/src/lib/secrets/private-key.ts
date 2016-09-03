@@ -1,6 +1,8 @@
 import {
     ISecret,
     IManifest,
+    IAsymmetricPrivateKeyManifest,
+    IAsymmetricPrivateKey
 } from "./secret-interface";
 import SecretBase, { AuthorizationConstants } from "./secret-base";
 import {
@@ -16,15 +18,6 @@ import ConfigPath from "../config/config-path";
 
 export module Authorization {
     export const typePrivateKey: string = "private-key";
-}
-
-export interface IAsymmetricPrivateKey extends ISecret {
-    pemFilePath: ConfigPath;
-}
-
-export interface IAsymmetricPrivateKeyManifest extends IManifest {
-    algorithm: "ec" | "rsa";
-    pemFilePath: string;
 }
 
 namespace AsymmetricPrivateKey {

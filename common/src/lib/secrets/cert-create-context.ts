@@ -8,7 +8,7 @@ export interface CertSubjectConfig {
     emailAddress: string;
 }
 
-export interface CertConfig {
+export interface CreateCertConfig {
     subject: CertSubjectConfig;
     days: number;
 }

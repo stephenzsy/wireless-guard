@@ -1,52 +1,55 @@
 import {
     AppContext,
     ConfigPath,
-    BuiltInUserEntities,
-    PrivateKey,
     RequestContext,
-    CaCert,
-    CertCreateContext,
-    Certificate
+    Secrets
 } from "wireless-guard-common";
+import {
+    rootUser,
+    dbUser,
+} from "../lib/deploy-context";
+import {
+    DeployAppConfig,
+    saveConfig,
+    loadConfig
+} from "../lib/config";
 
-if (!AppContext.hasConfig()) {
-    throw "Config not available";
-}
+const deployAppConfig: DeployAppConfig = loadConfig();
 
 const caConfigPath = AppContext.getSettingsConfigPath().path("cert", "ca.json");
-const caCertConfig = AppContext.getConfig<CertCreateContext.CertConfig>(caConfigPath);
+const caCertConfig = AppContext.getConfig<Secrets.CreateCertConfig>(caConfigPath);
 const dbServerConfigPath = AppContext.getSettingsConfigPath().path("cert", "db-server.json");
-const dbServerCertConfig = AppContext.getConfig<CertCreateContext.CertConfig>(dbServerConfigPath);
+const dbServerCertConfig = AppContext.getConfig<Secrets.CreateCertConfig>(dbServerConfigPath);
 
-const certSubject = new CertCreateContext.CertSubject(caCertConfig.subject, dbServerCertConfig.subject);
+const certSubject = new Secrets.CertSubject(caCertConfig.subject, dbServerCertConfig.subject);
 
-const dbServerUserContext = RequestContext.newUserRequestContext(BuiltInUserEntities.dbServerUser);
-const deploymentClientConfig = RequestContext.newUserRequestContext(BuiltInUserEntities.dbServerUser);
+const dbUserContext = AppContext.newContributedUserRequestContext("deploy", dbUser.id).elevate();
 
-async function configureServerCertificate() {
-    let privateKey = await PrivateKey.createNewRsaPrivateKeyAsync(dbServerUserContext);
-    let caSuiteManifest = CaCert.BuiltInCaCertSuites.getDbCaCertSuiteConfig();
-    let cert = await Certificate.createServerCertAsync(dbServerUserContext, privateKey, caSuiteManifest, dbServerCertConfig.days, certSubject.subject);
-    Certificate.BuiltInCertSuites.setDbServerCertSuiteConfig({
-        certId: cert.id.toString(),
-        privateKeyId: privateKey.id.toString()
-    });
+async function configureServerCertificate(): Promise<Secrets.ICertSuite> {
+    let privateKey = await Secrets.createNewRsaPrivateKeyAsync(dbUserContext);
+    let caSuiteManifest = deployAppConfig.dbCaCert;
+    let cert = await Secrets.createServerCertAsync(dbUserContext, privateKey, caSuiteManifest, dbServerCertConfig.days, certSubject.subject);
+    return {
+        certId: cert.id,
+        privateKeyId: privateKey.id
+    };
 }
 
-async function configureClientCertificate() {
-
-    let privateKey = await PrivateKey.createNewRsaPrivateKeyAsync(dbServerUserContext);
-    let caSuiteManifest = CaCert.BuiltInCaCertSuites.getDbCaCertSuiteConfig();
-    let cert = await Certificate.createServerCertAsync(dbServerUserContext, privateKey, caSuiteManifest, dbServerCertConfig.days, certSubject.subject);
-    Certificate.BuiltInCertSuites.setDbServerCertSuiteConfig({
-        certId: cert.id.toString(),
-        privateKeyId: privateKey.id.toString()
-    });
+async function configureClientCertificate(): Promise<Secrets.ICertSuite> {
+    let privateKey = await Secrets.createNewRsaPrivateKeyAsync(dbUserContext);
+    let caSuiteManifest = deployAppConfig.dbCaCert;
+    let cert = await Secrets.createClientCertAsync(dbUserContext, privateKey, caSuiteManifest, dbServerCertConfig.days, certSubject.subject);
+    return {
+        certId: cert.id,
+        privateKeyId: privateKey.id
+    };
 }
 
 async function execute() {
     try {
-        await configureServerCertificate();
+        deployAppConfig.dbServerCert = await configureServerCertificate();
+        deployAppConfig.dbClientCert = await configureClientCertificate();
+        saveConfig(deployAppConfig);
     } catch (e) {
         console.error(e);
     }

@@ -40,6 +40,10 @@ export abstract class UserEntityBase implements IUserEntity {
         return this._policies.map(toPolicyReference);
     }
 
+    public setPolicies(value: IPolicy[]) {
+        this._policies = value;
+    }
+
     public evalPolicies(action: string, resource: PolicyEntityIdentifier): IPolicyReference {
         if (!this._policies) {
             return null;
