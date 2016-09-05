@@ -49,6 +49,10 @@ export class ConfigPath {
     public saveJsonConfig<T>(config: T): void {
         fse.writeJsonSync(this.fsPath, config);
     }
+
+    public writeString(str: string): void {
+        fse.writeFileSync(this.fsPath, str);
+    }
 }
 
 export default ConfigPath;
