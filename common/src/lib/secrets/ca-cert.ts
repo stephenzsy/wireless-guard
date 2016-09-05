@@ -62,7 +62,7 @@ export async function createRootCaCertAsync(requestContext: IRequestContext,
         requestContext.moduleName) as IRootCaCertManifest;
     // expiry to be actual expiry - 1 day
     let expiryDateStr: string = moment.utc().add({ days: 364 }).toISOString();
-    manifest.expireAt = expiryDateStr;
+    manifest.expiresAt = expiryDateStr;
     let certPath = new ConfigPath(manifest.secretsDirPath).path("crt.pem");
     await WGOpenssl.req({
         new: true,
@@ -87,40 +87,18 @@ export class CaCertSuite {
         this.config = config;
     }
 
-    private getPrivateKey(requestContext: IRequestContext): IAsymmetricPrivateKey {
-        requestContext.authorize(
+    private getPrivateKey(caOwnerRequestContext: IRequestContext): IAsymmetricPrivateKey {
+        caOwnerRequestContext.authorize(
             AuthorizationConstants.Action.readSecret,
             {
                 type: PrivateKeyAuthorizationConstants.typePrivateKey,
                 identifierType: IdentifierType.Id,
-                identifier: "*"
+                identifier: this.config.privateKeyId.toString()
             },
             { requireElevated: true });
 
-        let manifest = ManifestRepo.loadManifest<IAsymmetricPrivateKeyManifest>(this.config.privateKeyId, requestContext.moduleName);
-        return loadPrivateKeyFromManifest(requestContext, manifest);
-    }
-
-    async signCertificate(
-        requestContext: IRequestContext,
-        csrInputPath: ConfigPath,
-        crtOutputPath: ConfigPath,
-        extFilePath: ConfigPath,
-        manifestId: string,
-        days: number
-    ): Promise<void> {
-        return WGOpenssl.x509({
-            req: true,
-            in: csrInputPath.fsPath,
-            out: crtOutputPath.fsPath,
-            setSerial: getGuidSerial(new Guid(manifestId)),
-            digest: "sha384",
-            extfile: extFilePath.fsPath,
-            extensions: "v3_req",
-            CAKey: this.getPrivateKey(requestContext).pemFilePath.fsPath,
-            CA: this.getCertificate(requestContext).pemFilePath.fsPath,
-            days: days
-        });
+        let manifest = ManifestRepo.loadManifest<IAsymmetricPrivateKeyManifest>(this.config.privateKeyId, caOwnerRequestContext.moduleName);
+        return loadPrivateKeyFromManifest(caOwnerRequestContext, manifest);
     }
 
     public getCertificate(requestContext: IRequestContext): IRootCaCert {
@@ -129,10 +107,53 @@ export class CaCertSuite {
             {
                 type: Authorization.typeRootCa,
                 identifierType: IdentifierType.Id,
-                identifier: "*"
+                identifier: this.config.certId.toString()
             },
             { requireElevated: true });
         let manifest = ManifestRepo.loadManifest<IRootCaCertManifest>(this.config.certId, requestContext.moduleName);
         return new RootCaCert(manifest);
     }
+
+    public async signCertificate(
+        requestContext: IRequestContext,
+        caOwnerRequestContext: IRequestContext,
+        csrInputPath: ConfigPath,
+        crtOutputPath: ConfigPath,
+        extFilePath: ConfigPath,
+        manifestId: string,
+        days: number
+    ): Promise<void> {
+        requestContext.authorize(
+            AuthorizationConstants.Action.signCertificate,
+            {
+                type: Authorization.typeRootCa,
+                identifierType: IdentifierType.Id,
+                identifier: this.config.certId.toString()
+            },
+            { requireElevated: true });
+        return WGOpenssl.x509({
+            req: true,
+            in: csrInputPath.fsPath,
+            out: crtOutputPath.fsPath,
+            setSerial: getGuidSerial(new Guid(manifestId)),
+            digest: "sha384",
+            extfile: extFilePath.fsPath,
+            extensions: "v3_req",
+            CAKey: this.getPrivateKey(caOwnerRequestContext).pemFilePath.fsPath,
+            CA: this.getCertificate(requestContext).pemFilePath.fsPath,
+            days: days
+        });
+    }
+}
+
+export function loadRootCaCertFromManifest(requestContext: IRequestContext, manifest: IRootCaCertManifest): IRootCaCert {
+    requestContext.authorize(
+        AuthorizationConstants.Action.readSecret,
+        {
+            type: Authorization.typeRootCa,
+            identifierType: IdentifierType.Id,
+            identifier: manifest.id
+        },
+        { requireElevated: true });
+    return new RootCaCert(manifest);
 }

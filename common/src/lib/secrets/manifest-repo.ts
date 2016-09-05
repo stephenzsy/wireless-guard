@@ -29,7 +29,8 @@ export module SecretManifiestRepository {
             id: id.toString(),
             ownerId: owner.id.toString(),
             manifestPath: manifestPath.fsPath,
-            secretsDirPath: secretDirPath.fsPath
+            secretsDirPath: secretDirPath.fsPath,
+            createdAt: new Date().toISOString()
         };
         manifestPath.ensureDirExists().saveJsonConfig(manifest);
         return manifest;

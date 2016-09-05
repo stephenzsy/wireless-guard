@@ -37,6 +37,11 @@ export class ConfigPath {
         return this;
     }
 
+    public mkdirp(): this {
+        fse.mkdirpSync(path.dirname(this.fsPath));
+        return this;
+    }
+
     public loadJsonConfig<T>(): T {
         return require(this.fsPath) as T;
     }

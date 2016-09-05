@@ -40,8 +40,8 @@ export interface IRequestContext {
 export class AnonymousNotAllowedError extends AuthorizationErrors.NotAuthorized { }
 export class ElevatedRequestContextRequiredError extends AuthorizationErrors.NotAuthorized { }
 export class PolicyDeniedError extends AuthorizationErrors.NotAuthorized {
-    constructor(deniedPolicy?: IPolicyReference) {
-        let errorMessage: string = deniedPolicy ?
+    constructor(deniedPolicy?: IPolicyReference, errorMessage?: string) {
+        errorMessage = errorMessage || deniedPolicy ?
             "Access denied by policy: " + deniedPolicy.id.toString() + " (" + deniedPolicy.name + ")" :
             "Access denied by default";
         super(errorMessage);

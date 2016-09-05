@@ -24,25 +24,22 @@ const dbServerCertConfig = AppContext.getConfig<Secrets.CreateCertConfig>(dbServ
 const certSubject = new Secrets.CertSubject(caCertConfig.subject, dbServerCertConfig.subject);
 
 const dbUserContext = AppContext.newContributedUserRequestContext("deploy", dbUser.id).elevate();
+const rootUserContext = AppContext.newContributedUserRequestContext("deploy", rootUser.id).elevate();
 
 async function configureServerCertificate(): Promise<Secrets.ICertSuite> {
-    let privateKey = await Secrets.createNewRsaPrivateKeyAsync(dbUserContext);
-    let caSuiteManifest = deployAppConfig.dbCaCert;
-    let cert = await Secrets.createServerCertAsync(dbUserContext, privateKey, caSuiteManifest, dbServerCertConfig.days, certSubject.subject);
-    return {
-        certId: cert.id,
-        privateKeyId: privateKey.id
-    };
+    return Secrets.createRsaServerCertificateSuite(dbUserContext,
+        rootUserContext,
+        deployAppConfig.dbCaCert,
+        dbServerCertConfig.days,
+        certSubject.subject);
 }
 
 async function configureClientCertificate(): Promise<Secrets.ICertSuite> {
-    let privateKey = await Secrets.createNewRsaPrivateKeyAsync(dbUserContext);
-    let caSuiteManifest = deployAppConfig.dbCaCert;
-    let cert = await Secrets.createClientCertAsync(dbUserContext, privateKey, caSuiteManifest, dbServerCertConfig.days, certSubject.subject);
-    return {
-        certId: cert.id,
-        privateKeyId: privateKey.id
-    };
+    return Secrets.createRsaClientCertificate(dbUserContext,
+        rootUserContext,
+        deployAppConfig.dbCaCert,
+        dbServerCertConfig.days,
+        certSubject.subject);
 }
 
 async function execute() {

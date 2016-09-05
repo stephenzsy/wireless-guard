@@ -24,5 +24,6 @@ export module AuthorizationConstants {
         export const createSecret: string = "create";
         export const readSecret: string = "read";
         export const deleteSecret: string = "delete";
+        export const signCertificate: string = "sign";
     }
 }

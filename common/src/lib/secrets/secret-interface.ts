@@ -14,6 +14,7 @@ export interface IManifest {
      */
     manifestPath: string;
     secretsDirPath: string;
+    createdAt: string;
 }
 
 export interface IAsymmetricPrivateKey extends ISecret {
@@ -30,11 +31,14 @@ export interface ICertBase extends ISecret {
 }
 
 export interface ICertManifestBase extends IManifest {
-    expireAt: string;
+    expiresAt: string;
     pemFilePath: string;
 }
 
-export interface ICertificate extends ICertBase { }
+export interface ICertificate extends ICertBase {
+    caChainPemFilePath: ConfigPath;
+}
+
 export interface ICertificateManifest extends ICertManifestBase {
     caChainPemFilePath: string;
 }

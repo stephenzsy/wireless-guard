@@ -26,25 +26,13 @@ const certSubject = new Secrets.CertSubject(certConfig.subject);
 const rootUserContext = AppContext.newContributedUserRequestContext("deploy", rootUser.id).elevate();
 
 async function configureRootCaCertificate(): Promise<Secrets.ICertSuite> {
-    let privateKey = await Secrets.createNewEcPrivateKeyAsync(rootUserContext);
-    let cert = await Secrets.createRootCaCertAsync(rootUserContext,
-        privateKey,
+    return Secrets.createEcRootCaCertSuiteAsync(rootUserContext,
         certSubject.subject);
-    return {
-        certId: cert.id,
-        privateKeyId: privateKey.id
-    };
 }
 
 async function configureDbCaCertificate(): Promise<Secrets.ICertSuite> {
-    let privateKey = await Secrets.createNewRsaPrivateKeyAsync(rootUserContext);
-    let cert = await Secrets.createRootCaCertAsync(rootUserContext,
-        privateKey,
+    return Secrets.createRsaRootCaCertSuiteAsync(rootUserContext,
         certSubject.subject);
-    return {
-        certId: cert.id,
-        privateKeyId: privateKey.id
-    };
 }
 
 async function execute() {

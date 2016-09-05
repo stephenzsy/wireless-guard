@@ -3,7 +3,8 @@ import {
     AppContext,
     Users,
     Policies,
-    Secrets
+    Secrets,
+    ConfigPath
 } from "wireless-guard-common";
 import {
     DeployAppConfig,
