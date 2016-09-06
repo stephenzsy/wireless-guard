@@ -5,7 +5,7 @@
     "localityName": "None",
     "organizationName": "None",
     "organizationUnitName": "None",
-    "commonName": "db.wireless-guard.local",
+    "commonName": "db.wireless-guard",
     "emailAddress": "db@system"
   },
   "days": 30

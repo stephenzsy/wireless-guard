@@ -2,6 +2,7 @@ FROM wireless-guard-base:latest
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get install -yq mysql-server
+RUN mkdir /docker-entrypoint-initdb.d
 RUN rm -rf /var/lib/mysql \
 	&& mkdir -p /var/lib/mysql \
 	&& mkdir -p /var/run/mysqld \
@@ -21,4 +22,4 @@ RUN chmod a+x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 3306
-CMD ["/wireless-guard/start-mysqld"]
+CMD ["mysqld"]

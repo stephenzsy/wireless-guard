@@ -27,19 +27,36 @@ export interface IAsymmetricPrivateKeyManifest extends IManifest {
 }
 
 export interface ICertBase extends ISecret {
+    /**
+     * X509 certificate subject
+     */
+    subject: string;
+    expiresAt: Date;
     pemFilePath: ConfigPath;
 }
 
 export interface ICertManifestBase extends IManifest {
+    /**
+     * X509 certificate subject
+     */
+    subject: string;
     expiresAt: string;
     pemFilePath: string;
 }
 
 export interface ICertificate extends ICertBase {
+    /**
+     * X509 certificate issuer
+     */
+    issuer: string;
     caChainPemFilePath: ConfigPath;
 }
 
 export interface ICertificateManifest extends ICertManifestBase {
+    /**
+     * X509 certificate issuer
+     */
+    issuer: string;
     caChainPemFilePath: string;
 }
 

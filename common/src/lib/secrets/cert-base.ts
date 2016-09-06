@@ -16,6 +16,14 @@ export abstract class CertBase<M extends ICertManifestBase> extends SecretBase<M
     public get pemFilePath(): ConfigPath {
         return new ConfigPath(this.manifest.pemFilePath);
     }
+
+    public get subject(): string {
+        return this.manifest.subject;
+    }
+
+    public get expiresAt(): Date {
+        return new Date(this.manifest.expiresAt);
+    }
 }
 
 export function getGuidSerial(guid: Guid): string {

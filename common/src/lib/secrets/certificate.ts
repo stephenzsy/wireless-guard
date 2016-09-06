@@ -34,6 +34,10 @@ class Cert extends CertBase<ICertificateManifest> implements ICertificate {
         super(manifest);
     }
 
+    public get issuer(): string {
+        return this.manifest.issuer;
+    }
+
     public get caChainPemFilePath(): ConfigPath {
         return new ConfigPath(this.manifest.caChainPemFilePath);
     }
@@ -78,8 +82,10 @@ async function createCertAsync(requestContext: IRequestContext,
         manifest.id,
         days
     );
+    manifest.issuer = caSuite.getCertificate(requestContext).subject;
     manifest.expiresAt = moment.utc().add({ days: days }).toISOString();
     manifest.pemFilePath = crtPath.fsPath;
+    manifest.subject = subject;
     let caChainPath: ConfigPath = dirPath.path("chain.pem");
     fsExtra.copySync(caSuite.getCertificate(requestContext).pemFilePath.fsPath, caChainPath.fsPath);
     manifest.caChainPemFilePath = caChainPath.fsPath;

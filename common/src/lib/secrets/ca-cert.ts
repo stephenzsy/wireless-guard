@@ -63,6 +63,7 @@ export async function createRootCaCertAsync(requestContext: IRequestContext,
     // expiry to be actual expiry - 1 day
     let expiryDateStr: string = moment.utc().add({ days: 364 }).toISOString();
     manifest.expiresAt = expiryDateStr;
+    manifest.subject = subject;
     let certPath = new ConfigPath(manifest.secretsDirPath).path("crt.pem");
     await WGOpenssl.req({
         new: true,
@@ -83,6 +84,8 @@ export async function createRootCaCertAsync(requestContext: IRequestContext,
 
 export class CaCertSuite {
     private config: ICertSuite;
+    private _rootCaCert: RootCaCert;
+
     constructor(config: ICertSuite) {
         this.config = config;
     }
@@ -110,8 +113,12 @@ export class CaCertSuite {
                 identifier: this.config.certId.toString()
             },
             { requireElevated: true });
+        if (this._rootCaCert) {
+            return this._rootCaCert;
+        }
         let manifest = ManifestRepo.loadManifest<IRootCaCertManifest>(this.config.certId, requestContext.moduleName);
-        return new RootCaCert(manifest);
+        this._rootCaCert = new RootCaCert(manifest);
+        return this._rootCaCert;
     }
 
     public async signCertificate(
