@@ -1,7 +1,7 @@
 FROM wireless-guard-base:latest
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get install -yq mysql-server
+RUN apt-get install -yq mysql-server gosu
 RUN mkdir /docker-entrypoint-initdb.d
 RUN rm -rf /var/lib/mysql \
 	&& mkdir -p /var/lib/mysql \

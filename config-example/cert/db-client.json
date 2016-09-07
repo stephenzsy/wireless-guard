@@ -5,8 +5,8 @@
     "localityName": "None",
     "organizationName": "None",
     "organizationUnitName": "None",
-    "commonName": "db-server-deploy",
-    "emailAddress": "db-server-deploy@system"
+    "commonName": "db-client-deploy",
+    "emailAddress": "db-client-deploy@system"
   },
   "days": 30
 }

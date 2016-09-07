@@ -20,8 +20,10 @@ const caConfigPath = AppContext.getSettingsConfigPath().path("cert", "ca.json");
 const caCertConfig = AppContext.getConfig<Secrets.CreateCertConfig>(caConfigPath);
 const dbServerConfigPath = AppContext.getSettingsConfigPath().path("cert", "db-server.json");
 const dbServerCertConfig = AppContext.getConfig<Secrets.CreateCertConfig>(dbServerConfigPath);
-
-const certSubject = new Secrets.CertSubject(caCertConfig.subject, dbServerCertConfig.subject);
+const dbServerCertSubject = new Secrets.CertSubject(caCertConfig.subject, dbServerCertConfig.subject);
+const dbClientConfigPath = AppContext.getSettingsConfigPath().path("cert", "db-client.json");
+const dbClientCertConfig = AppContext.getConfig<Secrets.CreateCertConfig>(dbClientConfigPath);
+const dbClientCertSubject = new Secrets.CertSubject(caCertConfig.subject, dbClientCertConfig.subject);
 
 const dbUserContext = AppContext.newContributedUserRequestContext("deploy", dbUser.id).elevate();
 const rootUserContext = AppContext.newContributedUserRequestContext("deploy", rootUser.id).elevate();
@@ -31,15 +33,15 @@ async function configureServerCertificate(): Promise<Secrets.ICertSuite> {
         rootUserContext,
         deployAppConfig.dbCaCert,
         dbServerCertConfig.days,
-        certSubject.subject);
+        dbServerCertSubject.subject);
 }
 
 async function configureClientCertificate(): Promise<Secrets.ICertSuite> {
     return Secrets.createRsaClientCertificate(dbUserContext,
         rootUserContext,
         deployAppConfig.dbCaCert,
-        dbServerCertConfig.days,
-        certSubject.subject);
+        dbClientCertConfig.days,
+        dbClientCertSubject.subject);
 }
 
 async function execute() {

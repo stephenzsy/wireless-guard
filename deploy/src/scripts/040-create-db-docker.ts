@@ -48,24 +48,25 @@ const sslCnf: string = [
 const mysqlSslScriptPath = dockerDir.path("mysqld-ssl.cnf");
 mysqlSslScriptPath.writeString(sslCnf);
 
-serverCert.issuer
+const dbClientCertSuite = deployAppConfig.dbClientCert;
+const clientCert = Secrets.loadClientCert(dbUserContext, dbClientCertSuite.certId);
 
 // initialization SQL
 const initSql: string = [
-  "DELETE FROM mysql.user",
-  `CREATE USER 'root'@'%' REQUIRE ISSUER '${serverCert.issuer}'`,
-  "GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION",
-  "DROP DATABASE IF EXISTS test",
-  "FLUSH PRIVILEGES"
+    "DELETE FROM mysql.user",
+    `CREATE USER 'root'@'%' REQUIRE SUBJECT '${clientCert.subject}' AND ISSUER '${clientCert.issuer}'`,
+    "GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION",
+    "DROP DATABASE IF EXISTS test",
+    "FLUSH PRIVILEGES"
 ].join(" ;\n") + " ;\n";
 dockerDir.path("init.sql").writeString(initSql);
-
 
 const dockerRunScriptPath = AppContext.getInstanceConfigPath("deploy").path("docker-run-dev.sh");
 const runScript: string = [
     "#!/bin/bash",
     [
         "docker", "run",
+        "-d",
         "-p", "13306:3306",
         "-v", `${dockerDir.fsPath}:/wireless-guard`,
         "wireless-guard-mysql"

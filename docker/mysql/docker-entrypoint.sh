@@ -27,6 +27,10 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" -a "$(id -u)" = '0' ]; then
 	DATADIR="$(_datadir "$@")"
 	mkdir -p "$DATADIR"
 	chown -R mysql:mysql "$DATADIR"
+
+	# pre mysqld start
+	ln -snf "/wireless-guard/mysqld-ssl.cnf" "/etc/mysql/mysql.conf.d/mysqld-ssl.cnf";
+
 	exec gosu mysql "$BASH_SOURCE" "$@"
 fi
 
@@ -69,21 +73,10 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 			mysql_tzinfo_to_sql /usr/share/zoneinfo | sed 's/Local time zone must be set--see zic manual page/FCTY/' | "${mysql[@]}" mysql
 		fi
 
-		if [ ! -z "$MYSQL_RANDOM_ROOT_PASSWORD" ]; then
-			MYSQL_ROOT_PASSWORD="$(pwgen -1 32)"
-			echo "GENERATED ROOT PASSWORD: $MYSQL_ROOT_PASSWORD"
-		fi
-		"${mysql[@]}" <<-EOSQL
-			-- What's done in this file shouldn't be replicated
-			--  or products like mysql-fabric won't work
-			SET @@SESSION.SQL_LOG_BIN=0;
-
-			DELETE FROM mysql.user ;
-			CREATE USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' ;
-			GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION ;
-			DROP DATABASE IF EXISTS test ;
-			FLUSH PRIVILEGES ;
-		EOSQL
+		echo
+		echo "Init MySQL root user"
+		"${mysql[@]}" < "/wireless-guard/init.sql";
+		echo
 
 		if [ ! -z "$MYSQL_ROOT_PASSWORD" ]; then
 			mysql+=( -p"${MYSQL_ROOT_PASSWORD}" )
@@ -92,16 +85,6 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		if [ "$MYSQL_DATABASE" ]; then
 			echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` ;" | "${mysql[@]}"
 			mysql+=( "$MYSQL_DATABASE" )
-		fi
-
-		if [ "$MYSQL_USER" -a "$MYSQL_PASSWORD" ]; then
-			echo "CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD' ;" | "${mysql[@]}"
-
-			if [ "$MYSQL_DATABASE" ]; then
-				echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* TO '$MYSQL_USER'@'%' ;" | "${mysql[@]}"
-			fi
-
-			echo 'FLUSH PRIVILEGES ;' | "${mysql[@]}"
 		fi
 
 		echo
@@ -115,28 +98,15 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 			echo
 		done
 
-		if [ ! -z "$MYSQL_ONETIME_PASSWORD" ]; then
-			"${mysql[@]}" <<-EOSQL
-				ALTER USER 'root'@'%' PASSWORD EXPIRE;
-			EOSQL
-		fi
 		if ! kill -s TERM "$pid" || ! wait "$pid"; then
 			echo >&2 'MySQL init process failed.'
 			exit 1
 		fi
 
 		echo
-		echo "Init MySQL"
-		"${mysql[@]}" < "/wireless-guard/init.sql";
-		echo
-
-		echo
 		echo 'MySQL init process done. Ready for start up.'
 		echo
 	fi
 fi
-
-# pre mysqld start
-ln -snf "/wireless-guard/mysqld-ssl.cnf" "/etc/mysql/mysql.conf.d/mysqld-ssl.cnf";
 
 exec "$@"

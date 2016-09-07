@@ -85,7 +85,7 @@ export function loadConfig(): DeployAppConfig {
             };
         }
         if (definition.dbClientCert) {
-            config.dbCaCert = config.dbClientCert || {
+            config.dbClientCert = config.dbClientCert || {
                 certId: new Guid(definition.dbClientCert.certId),
                 privateKeyId: new Guid(definition.dbClientCert.privateKeyId)
             };
