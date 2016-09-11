@@ -1,5 +1,5 @@
 import { IManifest } from "./secret-interface";
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 import AppContext from "../app-context";
 import ConfigPath from "../config/config-path";
 import { IUser } from "../users";
@@ -10,7 +10,7 @@ export module SecretManifiestRepository {
     const manifestFilename: string = "manifest.json";
 
     export class ManifestDoesNotExistError extends GeneralErrors.ResourceNotExistError {
-        constructor(manifestId: Guid) {
+        constructor(manifestId: Uuid) {
             super(`Manifest ${manifestId.toString()} is not found.`);
         }
     }
@@ -21,7 +21,7 @@ export module SecretManifiestRepository {
     }
 
     export function initManifest(owner: IUser, moduleName: AppContext.ModuleName): IManifest {
-        let id = new Guid();
+        let id = new Uuid();
         let secretDirPath = getManifestDirectory(moduleName)
             .path(id.toString());
         let manifestPath = secretDirPath.path(manifestFilename);
@@ -36,7 +36,7 @@ export module SecretManifiestRepository {
         return manifest;
     }
 
-    export function loadManifest<T extends IManifest>(id: Guid, moduleName: AppContext.ModuleName): T {
+    export function loadManifest<T extends IManifest>(id: Uuid, moduleName: AppContext.ModuleName): T {
         let secretDirPath = getManifestDirectory(moduleName)
             .path(id.toString());
         let manifestPath = secretDirPath.path(manifestFilename);

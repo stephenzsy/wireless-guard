@@ -1,4 +1,4 @@
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 import {
     IUserEntity
 } from "./user-interface"
@@ -13,16 +13,16 @@ import {
 } from "../policies/utils";
 
 export abstract class UserEntityBase implements IUserEntity {
-    private _id: Guid;
+    private _id: Uuid;
     private _name: string;
     private _policies: IPolicy[];
 
-    constructor(id: Guid, name: string) {
+    constructor(id: Uuid, name: string) {
         this._id = id;
         this._name = name;
     }
 
-    public get id(): Guid {
+    public get id(): Uuid {
         return this._id;
     }
 

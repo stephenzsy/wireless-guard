@@ -1,4 +1,4 @@
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 import {
     IUser,
     IUserGroup
@@ -10,9 +10,9 @@ import {
 import {
     AuthorizationErrors
 } from "../errors";
+import AppContext from "../app-context";
 
 export type LogLevel = "info" | "debug";
-export type ModuleName = "deploy";
 
 export interface AuthorizeOptions {
     requireElevated?: boolean;
@@ -26,8 +26,8 @@ export interface IUserContext {
 }
 
 export interface IRequestContext {
-    requestId: Guid;
-    moduleName: ModuleName;
+    requestId: Uuid;
+    moduleName: AppContext.ModuleName;
     userContext: IUserContext;
     authorize(action: string, resource: PolicyEntityIdentifier, options?: AuthorizeOptions): IPolicyReference;
     log(level: LogLevel, message: string);

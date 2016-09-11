@@ -1,11 +1,11 @@
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 import {
     IPolicyReference,
 } from "../policies";
 import {IRequestContext} from "../request-context";
 
 export interface IUserEntityReference {
-    id: Guid;
+    id: Uuid;
     name: string;
 }
 

@@ -12,7 +12,7 @@ import {
     IRequestContext,
     PolicyDeniedError
 } from "../request-context";
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 import ManifestRepo from "./manifest-repo";
 import { WGOpenssl } from "wireless-guard-openssl";
 import ConfigPath from "../config/config-path";
@@ -26,6 +26,19 @@ type IPrivateKeyManifestBase = IAsymmetricPrivateKeyManifest;
 class KeyBase<M extends IPrivateKeyManifestBase> extends SecretBase<M> implements IAsymmetricPrivateKey {
     public get pemFilePath(): ConfigPath {
         return new ConfigPath(this.manifest.pemFilePath);
+    }
+
+    public readPrivateKey(requestContext: IRequestContext): Promise<Buffer> {
+        requestContext.authorize(
+            AuthorizationConstants.Action.readSecret,
+            {
+                type: Authorization.typePrivateKey,
+                identifierType: IdentifierType.Id,
+                identifier: this.manifest.id
+            },
+            { requireElevated: true });
+
+        return this.pemFilePath.read();
     }
 }
 

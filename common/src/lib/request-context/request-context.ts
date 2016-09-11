@@ -1,6 +1,7 @@
 import * as winston from "winston";
 
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
+import AppContext from "../app-context";
 import {
     IRequestContext,
     IUserContext,
@@ -8,8 +9,7 @@ import {
     ElevatedRequestContextRequiredError,
     PolicyDeniedError,
     AuthorizeOptions,
-    LogLevel,
-    ModuleName
+    LogLevel
 } from "./request-context-interface";
 import UserContext from "./user-context";
 import {
@@ -21,9 +21,9 @@ import { IUser } from "../users"
 import User from "../users/user";
 
 export default class RequestContext implements IRequestContext {
-    private _requestId: Guid;
+    private _requestId: Uuid;
     public userContext: IUserContext;
-    public moduleName: ModuleName;
+    public moduleName: AppContext.ModuleName;
     private isElevated: boolean;
 
     constructor(original?: RequestContext, isElevated: boolean = false) {
@@ -32,12 +32,12 @@ export default class RequestContext implements IRequestContext {
             this.userContext = original.userContext;
             this.moduleName = original.moduleName;
         } else {
-            this._requestId = new Guid();
+            this._requestId = new Uuid();
         }
         this.isElevated = isElevated;
     }
 
-    public get requestId(): Guid {
+    public get requestId(): Uuid {
         return this._requestId;
     }
 

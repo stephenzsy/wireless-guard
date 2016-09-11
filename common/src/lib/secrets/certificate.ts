@@ -2,7 +2,7 @@ import * as moment from "moment";
 import * as fsExtra from "fs-extra";
 import WGOpenssl from "wireless-guard-openssl";
 
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 import AppContext from "../app-context";
 import {
     AuthorizationConstants
@@ -30,8 +30,8 @@ export module Authorization {
 }
 
 class Cert extends CertBase<ICertificateManifest> implements ICertificate {
-    constructor(manifest: ICertificateManifest) {
-        super(manifest);
+    constructor(manifest: ICertificateManifest, authorizationType: string) {
+        super(manifest, authorizationType);
     }
 
     public get issuer(): string {
@@ -40,6 +40,18 @@ class Cert extends CertBase<ICertificateManifest> implements ICertificate {
 
     public get caChainPemFilePath(): ConfigPath {
         return new ConfigPath(this.manifest.caChainPemFilePath);
+    }
+
+    public readCaChain(requestContext: IRequestContext): Promise<Buffer> {
+        requestContext.authorize(
+            AuthorizationConstants.Action.readSecret,
+            {
+                type: this.authorizationType,
+                identifierType: IdentifierType.Id,
+                identifier: this.manifest.id
+            });
+
+        return this.caChainPemFilePath.read();
     }
 }
 
@@ -54,6 +66,7 @@ function createCsr(csrOutputPath: ConfigPath, privateKey: IAsymmetricPrivateKey,
 }
 
 async function createCertAsync(requestContext: IRequestContext,
+    authorizationType: string,
     caOwnerRequestContext: IRequestContext,
     manifest: ICertificateManifest,
     privateKey: IAsymmetricPrivateKey,
@@ -91,7 +104,7 @@ async function createCertAsync(requestContext: IRequestContext,
     manifest.caChainPemFilePath = caChainPath.fsPath;
     new ConfigPath(manifest.manifestPath).saveJsonConfig(manifest);
     requestContext.log("info", "Created server certificate: " + manifest.id);
-    return new Cert(manifest);
+    return new Cert(manifest, authorizationType);
 }
 
 async function writeV3Ext(configPath: ConfigPath, subjectAltDnsNames: string[] = [], subjectAltIps: string[] = []) {
@@ -144,6 +157,7 @@ export async function createServerCertAsync(requestContext: IRequestContext,
     let manifest: ICertificateManifest = ManifestRepo.initManifest(requestContext.userContext.user,
         requestContext.moduleName) as ICertificateManifest;
     return createCertAsync(requestContext,
+        Authorization.typeServerCert,
         caOwnerRequestContext,
         manifest,
         privateKey,
@@ -171,6 +185,7 @@ export async function createClientCertAsync(requestContext: IRequestContext,
     let manifest: ICertificateManifest = ManifestRepo.initManifest(requestContext.userContext.user,
         requestContext.moduleName) as ICertificateManifest;
     return createCertAsync(requestContext,
+        Authorization.typeClientCert,
         caOwnerRequestContext,
         manifest,
         privateKey,
@@ -198,9 +213,8 @@ function loadCertFromManifest(requestContext: IRequestContext, manifest: ICertif
             type: authorizationResourceType,
             identifierType: IdentifierType.Id,
             identifier: manifest.id
-        },
-        { requireElevated: true });
-    return new Cert(manifest);
+        });
+    return new Cert(manifest, authorizationResourceType);
 }
 
 export function loadServerCertFromManifest(requestContext: IRequestContext, manifest: ICertificateManifest): ICertificate {

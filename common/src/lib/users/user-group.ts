@@ -6,7 +6,7 @@ import {
     IUserGroup
 } from "./user-interface"
 import User from "./user"
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 
 export default class UserGroup extends UserEntityBase implements IUserGroup {
     public get members(): User[] {

@@ -22,7 +22,7 @@ import {
     IRequestContext,
     PolicyDeniedError
 } from "../request-context";
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 import ManifestRepo from "./manifest-repo";
 import WGOpenssl from "wireless-guard-openssl";
 import ConfigPath from "../config/config-path";
@@ -42,7 +42,7 @@ namespace Authorization {
 
 class RootCaCert extends CertBase<IRootCaCertManifest> implements IRootCaCert {
     constructor(manifest: IRootCaCertManifest) {
-        super(manifest);
+        super(manifest, Authorization.typeRootCa);
     }
 }
 
@@ -70,7 +70,7 @@ export async function createRootCaCertAsync(requestContext: IRequestContext,
         x509: true,
         extensions: "v3_ca",
         key: privateKey.pemFilePath.fsPath,
-        setSerial: getGuidSerial(new Guid(manifest.id)),
+        setSerial: getGuidSerial(new Uuid(manifest.id)),
         out: certPath.fsPath,
         digest: "sha384",
         subj: subject,
@@ -142,7 +142,7 @@ export class CaCertSuite {
             req: true,
             in: csrInputPath.fsPath,
             out: crtOutputPath.fsPath,
-            setSerial: getGuidSerial(new Guid(manifestId)),
+            setSerial: getGuidSerial(new Uuid(manifestId)),
             digest: "sha384",
             extfile: extFilePath.fsPath,
             extensions: "v3_req",

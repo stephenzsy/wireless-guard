@@ -53,6 +53,17 @@ export class ConfigPath {
     public writeString(str: string): void {
         fse.writeFileSync(this.fsPath, str);
     }
+
+    public async read(): Promise<Buffer> {
+        return new Promise<Buffer>((resolve, reject) => {
+            fs.readFile(this.fsPath, (err, data) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(data);
+            })
+        });
+    }
 }
 
 export default ConfigPath;

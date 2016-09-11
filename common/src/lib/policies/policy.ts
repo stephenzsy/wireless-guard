@@ -1,4 +1,4 @@
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 import {
     PolicyDefinition,
     PolicyDefinitionEffect,
@@ -17,7 +17,7 @@ function toPolicyEffectAllow(value: string): boolean {
 }
 
 export default class Policy implements IPolicy {
-    private _id: Guid;
+    private _id: Uuid;
     private _name: string;
     private _allow: boolean;
 
@@ -27,7 +27,7 @@ export default class Policy implements IPolicy {
     private resourcesMatcher: IMatcher<PolicyEntityIdentifier>;
 
     constructor(policyDefinition: PolicyDefinition) {
-        this._id = new Guid(policyDefinition.id);
+        this._id = new Uuid(policyDefinition.id);
         this._name = policyDefinition.name;
         this._allow = toPolicyEffectAllow(policyDefinition.effect);
 
@@ -40,7 +40,7 @@ export default class Policy implements IPolicy {
         }
     }
 
-    public get id(): Guid {
+    public get id(): Uuid {
         return this._id;
     }
 

@@ -4,13 +4,24 @@ import {
     ICertBase,
     ICertManifestBase
 } from "./secret-interface";
-import SecretBase from "./secret-base";
-import Guid from "../common/guid";
+import SecretBase, {
+    AuthorizationConstants
+} from "./secret-base";
+import Uuid from "../common/uuid";
 import ConfigPath from "../config/config-path";
+import {
+    IRequestContext
+} from "../request-context";
+import {
+    IdentifierType
+} from "../policies"
 
 export abstract class CertBase<M extends ICertManifestBase> extends SecretBase<M> implements ICertBase {
-    constructor(manifest: M) {
+    protected authorizationType: string;
+
+    constructor(manifest: M, authoricationType: string) {
         super(manifest);
+        this.authorizationType = authoricationType;
     }
 
     public get pemFilePath(): ConfigPath {
@@ -24,8 +35,20 @@ export abstract class CertBase<M extends ICertManifestBase> extends SecretBase<M
     public get expiresAt(): Date {
         return new Date(this.manifest.expiresAt);
     }
+
+    public readCertificate(requestContext: IRequestContext): Promise<Buffer> {
+        requestContext.authorize(
+            AuthorizationConstants.Action.readSecret,
+            {
+                type: this.authorizationType,
+                identifierType: IdentifierType.Id,
+                identifier: this.manifest.id
+            });
+
+        return this.pemFilePath.read();
+    }
 }
 
-export function getGuidSerial(guid: Guid): string {
-    return "0x" + Guid.convertToHexString(guid);
+export function getGuidSerial(guid: Uuid): string {
+    return "0x" + Uuid.convertToHexString(guid);
 }

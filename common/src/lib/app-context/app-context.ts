@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 import ConfigPath from "../config/config-path";
 import { IUser } from "../users";
 import UserContributions from "../users/contributions";
@@ -17,7 +17,7 @@ interface WGProcessEnv {
 
 export module AppContext {
 
-    export type ModuleName = "deploy";
+    export type ModuleName = "deploy" | "data-access";
 
     export interface AppConfigDefinition {
         deploymentId: string;
@@ -25,7 +25,7 @@ export module AppContext {
     }
 
     export interface AppConfig {
-        deploymentId: Guid;
+        deploymentId: Uuid;
         deploymentTimestamp: Date;
     }
 
@@ -37,7 +37,7 @@ export module AppContext {
     function defaultConvertAppConfigFromDefinition<T extends AppConfig, TDefinition extends AppConfigDefinition>(
         definition: TDefinition,
         config: T): void {
-        config.deploymentId = config.deploymentId || new Guid(definition.deploymentId);
+        config.deploymentId = config.deploymentId || new Uuid(definition.deploymentId);
         config.deploymentTimestamp = config.deploymentTimestamp || new Date(definition.deploymentTimestamp);
     }
 
@@ -103,7 +103,7 @@ export module AppContext {
     const contributedUsers: Map<ModuleName, UserContributions> = new Map();
     export function contributeUser(
         moduleName: ModuleName,
-        userId: Guid,
+        userId: Uuid,
         userName: string,
         policies: IPolicy[]): IUser {
         let contributions = contributedUsers.get(moduleName);
@@ -116,7 +116,7 @@ export module AppContext {
         return user;
     }
 
-    export function newContributedUserRequestContext(moduleName: ModuleName, userId: Guid, resolveGroups: boolean = true): IRequestContext {
+    export function newContributedUserRequestContext(moduleName: ModuleName, userId: Uuid, resolveGroups: boolean = true): IRequestContext {
         let contributions = contributedUsers.get(moduleName);
         if (!contributions) {
             throw `Module: ${moduleName} does not contain contributed user ${userId.toString()}`;

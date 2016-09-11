@@ -1,4 +1,4 @@
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 import {
     PolicyDefinitionMatch,
     IdentifierType,

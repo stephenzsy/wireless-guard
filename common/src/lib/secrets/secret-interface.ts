@@ -1,9 +1,10 @@
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 import ConfigPath from "../config/config-path"
 import { PolicyDefinition } from "../policies";
+import { IRequestContext } from "../request-context";
 
 export interface ISecret {
-    id: Guid;
+    id: Uuid;
 }
 
 export interface IManifest {
@@ -19,6 +20,7 @@ export interface IManifest {
 
 export interface IAsymmetricPrivateKey extends ISecret {
     pemFilePath: ConfigPath;
+    readPrivateKey(requestContext: IRequestContext): Promise<Buffer>;
 }
 
 export interface IAsymmetricPrivateKeyManifest extends IManifest {
@@ -33,6 +35,7 @@ export interface ICertBase extends ISecret {
     subject: string;
     expiresAt: Date;
     pemFilePath: ConfigPath;
+    readCertificate(requestContext: IRequestContext): Promise<Buffer>;
 }
 
 export interface ICertManifestBase extends IManifest {
@@ -50,6 +53,7 @@ export interface ICertificate extends ICertBase {
      */
     issuer: string;
     caChainPemFilePath: ConfigPath;
+    readCaChain(requestContext: IRequestContext): Promise<Buffer>;
 }
 
 export interface ICertificateManifest extends ICertManifestBase {
@@ -64,8 +68,8 @@ export interface IRootCaCert extends ICertBase { }
 export interface IRootCaCertManifest extends ICertManifestBase { }
 
 export interface ICertSuite {
-    certId: Guid,
-    privateKeyId: Guid
+    certId: Uuid,
+    privateKeyId: Uuid
 }
 
 export interface ICertSuiteManifest {

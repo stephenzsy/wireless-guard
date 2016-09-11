@@ -1,4 +1,4 @@
-import Guid from "../common/guid";
+import Uuid from "../common/uuid";
 
 import {
     IManifest,
@@ -6,15 +6,15 @@ import {
 } from "./secret-interface";
 
 export default class SecretBase<M extends IManifest> {
-    private _id: Guid;
+    private _id: Uuid;
     protected manifest: M;
 
     constructor(manifest: M) {
         this.manifest = manifest;
-        this._id = new Guid(manifest.id);
+        this._id = new Uuid(manifest.id);
     }
 
-    public get id(): Guid {
+    public get id(): Uuid {
         return this._id;
     }
 }
