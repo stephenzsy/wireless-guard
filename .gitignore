@@ -5,6 +5,9 @@ common/src/**/*.js
 deploy/dist/**/*
 !deploy/dist/**/*.keep
 deploy/src/**/*.js
+data-access/dist/**/*
+!data-access/dist/**/*.keep
+data-access/src/**/*.js
 typings
 *.log
 /config

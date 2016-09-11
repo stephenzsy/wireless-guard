@@ -4,7 +4,10 @@ import Uuid from "../common/uuid";
 import ConfigPath from "../config/config-path";
 import { IUser } from "../users";
 import UserContributions from "../users/contributions";
-import { IRequestContext } from "../request-context";
+import {
+    IRequestContext,
+    IService
+} from "../request-context";
 import { IPolicy, PolicyDefinition } from "../policies";
 import Policy from "../policies/policy";
 import RequestContext from "../request-context/request-context";
@@ -116,7 +119,9 @@ export module AppContext {
         return user;
     }
 
-    export function newContributedUserRequestContext(moduleName: ModuleName, userId: Uuid, resolveGroups: boolean = true): IRequestContext {
+    export function newContributedUserRequestContext(moduleName: ModuleName,
+        userId: Uuid,
+        resolveGroups: boolean = true): IRequestContext {
         let contributions = contributedUsers.get(moduleName);
         if (!contributions) {
             throw `Module: ${moduleName} does not contain contributed user ${userId.toString()}`;

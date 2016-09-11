@@ -9,7 +9,8 @@ import {
     ElevatedRequestContextRequiredError,
     PolicyDeniedError,
     AuthorizeOptions,
-    LogLevel
+    LogLevel,
+    IService
 } from "./request-context-interface";
 import UserContext from "./user-context";
 import {
@@ -25,6 +26,7 @@ export default class RequestContext implements IRequestContext {
     public userContext: IUserContext;
     public moduleName: AppContext.ModuleName;
     private isElevated: boolean;
+    private services: IDictionaryStringTo<IService> = {};
 
     constructor(original?: RequestContext, isElevated: boolean = false) {
         if (original) {
@@ -66,5 +68,18 @@ export default class RequestContext implements IRequestContext {
 
     public elevate(): IRequestContext {
         return new RequestContext(this, true);
+    }
+
+    public getService<T extends IService>(serviceTypeId: Uuid): T {
+        return this.services[serviceTypeId.toString()] as T;
+    }
+
+    public setService<T extends IService>(service: T): void {
+        this.services[service.serviceTypeId.toString()] = service;
+    }
+
+    public withService<T extends IService>(service: T): this {
+        this.services[service.serviceTypeId.toString()] = service;
+        return this;
     }
 }

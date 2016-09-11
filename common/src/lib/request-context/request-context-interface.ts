@@ -25,6 +25,10 @@ export interface IUserContext {
     evalPolicies(action: string, resource: PolicyEntityIdentifier): IPolicyReference;
 }
 
+export interface IService {
+    serviceTypeId: Uuid;
+}
+
 export interface IRequestContext {
     requestId: Uuid;
     moduleName: AppContext.ModuleName;
@@ -35,6 +39,8 @@ export interface IRequestContext {
      * Elevate to server request, can only be done by server
      */
     elevate(): IRequestContext;
+    getService<T extends IService>(serviceTypeId: Uuid): T;
+    setService<T extends IService>(service: T): void;
 }
 
 export class AnonymousNotAllowedError extends AuthorizationErrors.NotAuthorized { }

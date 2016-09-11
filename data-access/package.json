@@ -1,7 +1,7 @@
 {
-  "name": "wireless-guard-deploy",
+  "name": "wireless-guard-data-access",
   "version": "0.0.1",
-  "description": "Deploy utils of Wireless Guard",
+  "description": "Data access of Wireless Guard",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,10 +13,9 @@
     "url": "https://stepzsy.visualstudio.com/DefaultCollection/_git/wireless-guard"
   },
   "dependencies": {
-    "fs-extra": "^0.30.0",
-    "sequelize": "^3.24.2",
-    "wireless-guard-common": "^0.0.1",
-    "wireless-guard-openssl": "^0.0.1"
+    "bookshelf": "^0.10.0",
+    "knex": "^0.11.10",
+    "wireless-guard-common": "^0.0.1"
   },
   "devDependencies": {
     "del": "^2.2.2",
