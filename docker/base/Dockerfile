@@ -1,8 +1,8 @@
 FROM ubuntu:16.04
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get upgrade
-RUN apt-get install -y openssl curl xz-utils less vim
+RUN apt-get update && apt-get upgrade -yq
+RUN apt-get install -yq openssl curl xz-utils less vim
 
 # gpg keys listed at https://github.com/nodejs/node
 RUN set -ex \
@@ -20,7 +20,7 @@ RUN set -ex \
   done
 
 ENV NPM_CONFIG_LOGLEVEL info
-ENV NODE_VERSION 6.5.0
+ENV NODE_VERSION 6.6.0
 
 RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz" \
   && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
@@ -28,5 +28,3 @@ RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-
   && grep " node-v$NODE_VERSION-linux-x64.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
   && tar -xJf "node-v$NODE_VERSION-linux-x64.tar.xz" -C /usr/local --strip-components=1 \
   && rm "node-v$NODE_VERSION-linux-x64.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt
-
-

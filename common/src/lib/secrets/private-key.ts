@@ -12,7 +12,6 @@ import {
     IRequestContext,
     PolicyDeniedError
 } from "../request-context";
-import Uuid from "../common/uuid";
 import ManifestRepo from "./manifest-repo";
 import { WGOpenssl } from "wireless-guard-openssl";
 import ConfigPath from "../config/config-path";

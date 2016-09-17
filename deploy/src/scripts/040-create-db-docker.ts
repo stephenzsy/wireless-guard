@@ -1,3 +1,4 @@
+import * as crypto from "crypto";
 import * as path from "path";
 import * as fsExtra from "fs-extra";
 
@@ -7,6 +8,12 @@ import {
     RequestContext,
     Secrets
 } from "wireless-guard-common";
+
+import {
+    IDataAccessService,
+    DbConfig
+} from "wireless-guard-data-access";
+
 import {
     rootUser,
     dbUser,
@@ -17,10 +24,15 @@ import {
     loadConfig
 } from "../lib/config";
 
+if (!AppContext.hasConfig()) {
+    throw "Config not available";
+}
+
 const deployAppConfig: DeployAppConfig = loadConfig();
 const dbUserContext = AppContext.newContributedUserRequestContext("deploy", dbUser.id).elevate();
 
-const dockerDir: ConfigPath = AppContext.getInstanceConfigPath("deploy").path("mysql-docker").mkdirp();
+const moduleConfigPath = AppContext.getInstanceConfigPath("deploy");
+const dockerDir: ConfigPath = moduleConfigPath.path("mysql-docker").mkdirp();
 const certsRelPath: string = "certs";
 const certsDir: ConfigPath = dockerDir.path(certsRelPath).mkdirp();
 const serverCertRelPath: string = "server-crt.pem";
@@ -50,11 +62,13 @@ mysqlSslScriptPath.writeString(sslCnf);
 
 const dbClientCertSuite = deployAppConfig.dbClientCert;
 const clientCert = Secrets.loadClientCert(dbUserContext, dbClientCertSuite.certId);
+const clientPrivateKey = Secrets.loadPrivateKey(dbUserContext, dbClientCertSuite.privateKeyId);
+const password: string = (crypto.randomBytes(32) as Buffer).toString("hex");
 
 // initialization SQL
 const initSql: string = [
     "DELETE FROM mysql.user",
-    `CREATE USER 'root'@'%' REQUIRE SUBJECT '${clientCert.subject}' AND ISSUER '${clientCert.issuer}'`,
+    `CREATE USER 'root'@'%' IDENTIFIED BY '${password}' REQUIRE SUBJECT '${clientCert.subject}' AND ISSUER '${clientCert.issuer}'`,
     "GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION",
     "DROP DATABASE IF EXISTS test",
     "FLUSH PRIVILEGES"
@@ -66,6 +80,7 @@ const runScript: string = [
     "#!/bin/bash",
     [
         "docker", "run",
+        "--name", "wg_mysql",
         "-d",
         "-p", "13306:3306",
         "-v", `${dockerDir.fsPath}:/wireless-guard`,
@@ -73,3 +88,32 @@ const runScript: string = [
     ].join(" ")
 ].join("\n") + "\n";
 dockerRunScriptPath.writeString(runScript);
+
+const dbConfig: DbConfig = {
+    host: "0.0.0.0",
+    port: 13306,
+    database: null,
+    username: "root",
+    password: password,
+    sslCertSuite: {
+        certId: clientCert.id,
+        privateKeyId: clientPrivateKey.id
+    }
+}
+
+moduleConfigPath.path("db-user-root.json").saveJsonConfig(dbConfig);
+const mysqlConnScriptPath = AppContext.getInstanceConfigPath("deploy").path("docker-mysql.sh");
+const mysqlConnScript: string = [
+    "#!/bin/bash",
+    [
+        "mysql",
+        "-h" + "0.0.0.0",
+        "-P" + "13306",
+        "-u" + "root",
+        "-p" + password,
+        "--ssl-ca", clientCert.caChainPemFilePath.fsPath,
+        "--ssl-cert", clientCert.pemFilePath.fsPath,
+        "--ssl-key", clientPrivateKey.pemFilePath.fsPath
+    ].join(" ")
+].join("\n") + "\n";
+mysqlConnScriptPath.writeString(mysqlConnScript);

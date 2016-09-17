@@ -14,6 +14,10 @@ import {
     loadConfig
 } from "../lib/config";
 
+if (!AppContext.hasConfig()) {
+    throw "Config not available";
+}
+
 const deployAppConfig: DeployAppConfig = loadConfig();
 
 const caConfigPath = AppContext.getSettingsConfigPath().path("cert", "ca.json");

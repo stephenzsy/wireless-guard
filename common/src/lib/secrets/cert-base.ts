@@ -49,6 +49,6 @@ export abstract class CertBase<M extends ICertManifestBase> extends SecretBase<M
     }
 }
 
-export function getGuidSerial(guid: Uuid): string {
-    return "0x" + Uuid.convertToHexString(guid);
+export function getUuidSerial(uuid: string): string {
+    return "0x" + Uuid.convertToHexString(uuid);
 }

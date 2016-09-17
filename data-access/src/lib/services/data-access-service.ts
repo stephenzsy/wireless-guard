@@ -1,6 +1,8 @@
 import * as tls from "tls";
 
-import * as knex from "knex";
+import { Sequelize, Options as SequelizeOptions } from "sequelize";
+import * as _sequelize from "sequelize";
+const sequelize: any = _sequelize;
 
 import {
     RequestContext,
@@ -14,19 +16,19 @@ import {
 } from "./interfaces";
 
 class DataAccessService implements IDataAccessService {
-    private _serviceTypeId: Uuid;
-    private _connection: knex;
+    private _serviceTypeId: string;
+    private _connection: Sequelize;
 
-    constructor(connection: knex) {
-        this._serviceTypeId = new Uuid();
+    constructor(connection: Sequelize) {
+        this._serviceTypeId = Uuid.v4();
         this._connection = connection;
     }
 
-    public get serviceTypeId(): Uuid {
+    public get serviceTypeId(): string {
         return this._serviceTypeId;
     }
 
-    public get connection(): knex {
+    public get connection(): Sequelize {
         return this._connection;
     }
 }
@@ -37,23 +39,19 @@ export async function createDataAccessService(
     let clientCert = Secrets.loadClientCert(requestContext, dbConfig.sslCertSuite.certId)
     let cert: Buffer = await clientCert.readCertificate(requestContext);
     let caChain: Buffer = await clientCert.readCaChain(requestContext);
-    let elevatedContext = requestContext.elevate();
-    let key: Buffer = await Secrets.loadPrivateKey(elevatedContext, dbConfig.sslCertSuite.privateKeyId).readPrivateKey(elevatedContext);
-    let SecureContextOptions: tls.SecureContextOptions = {
+    let key: Buffer = await Secrets.loadPrivateKey(requestContext, dbConfig.sslCertSuite.privateKeyId).readPrivateKey(requestContext);
+    let secureContextOptions: tls.SecureContextOptions = {
         ca: caChain,
         cert: cert,
         key: key
     }
-    let conn: knex = knex({
-        dialect: "mysql2",
-        connection: {
-            host: dbConfig.host,
-            port: dbConfig.port,
-            user: dbConfig.username,
-            password: dbConfig.password,
-            database: dbConfig.database,
-            ssl: SecureContextOptions
-        } as knex.ConnectionConfig
+    let conn: Sequelize = new sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {
+        dialect: "mysql",
+        host: dbConfig.host,
+        port: dbConfig.port,
+        dialectOptions: {
+            ssl: secureContextOptions
+        }
     });
     return new DataAccessService(conn);
 }

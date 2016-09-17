@@ -15,8 +15,7 @@
   "dependencies": {
     "fs-extra": "^0.30.0",
     "sequelize": "^3.24.2",
-    "wireless-guard-common": "^0.0.1",
-    "wireless-guard-openssl": "^0.0.1"
+    "wireless-guard-common": "^0.0.1"
   },
   "devDependencies": {
     "del": "^2.2.2",

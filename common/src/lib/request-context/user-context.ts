@@ -10,7 +10,7 @@ import {
 } from "../policies";
 import {
     IUserContext
-} from "./request-context-interface";
+} from "./interfaces";
 
 export default class UserContext implements IUserContext {
     private _user: User;

@@ -7,7 +7,7 @@ import AppContext from "../app-context";
 import {
     AuthorizationConstants
 } from "./secret-base";
-import { CertBase, getGuidSerial } from "./cert-base";
+import { CertBase, getUuidSerial } from "./cert-base";
 import {
     IRequestContext
 } from "../request-context";

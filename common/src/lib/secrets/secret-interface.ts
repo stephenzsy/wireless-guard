@@ -1,10 +1,9 @@
-import Uuid from "../common/uuid";
 import ConfigPath from "../config/config-path"
 import { PolicyDefinition } from "../policies";
 import { IRequestContext } from "../request-context";
 
 export interface ISecret {
-    id: Uuid;
+    id: string;
 }
 
 export interface IManifest {
@@ -68,11 +67,6 @@ export interface IRootCaCert extends ICertBase { }
 export interface IRootCaCertManifest extends ICertManifestBase { }
 
 export interface ICertSuite {
-    certId: Uuid,
-    privateKeyId: Uuid
-}
-
-export interface ICertSuiteManifest {
     certId: string,
     privateKeyId: string
 }

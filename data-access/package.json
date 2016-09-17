@@ -12,9 +12,10 @@
     "type": "git",
     "url": "https://stepzsy.visualstudio.com/DefaultCollection/_git/wireless-guard"
   },
+  "typings": "dist/typings/index.d.ts",
   "dependencies": {
-    "bookshelf": "^0.10.0",
-    "knex": "^0.11.10",
+    "mysql": "^2.11.1",
+    "sequelize": "^3.24.3",
     "wireless-guard-common": "^0.0.1"
   },
   "devDependencies": {

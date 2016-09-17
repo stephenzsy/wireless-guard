@@ -1,13 +1,12 @@
 import * as fs from "fs";
 
-import Uuid from "../common/uuid";
 import ConfigPath from "../config/config-path";
 import { IUser } from "../users";
 import UserContributions from "../users/contributions";
 import {
     IRequestContext,
     IService
-} from "../request-context";
+} from "../request-context/interfaces";
 import { IPolicy, PolicyDefinition } from "../policies";
 import Policy from "../policies/policy";
 import RequestContext from "../request-context/request-context";
@@ -22,13 +21,8 @@ export module AppContext {
 
     export type ModuleName = "deploy" | "data-access";
 
-    export interface AppConfigDefinition {
-        deploymentId: string;
-        deploymentTimestamp: string;
-    }
-
     export interface AppConfig {
-        deploymentId: Uuid;
+        deploymentId: string;
         deploymentTimestamp: Date;
     }
 
@@ -37,45 +31,22 @@ export module AppContext {
 
     var appConfigs: Map<ModuleName, AppConfig> = new Map();
 
-    function defaultConvertAppConfigFromDefinition<T extends AppConfig, TDefinition extends AppConfigDefinition>(
-        definition: TDefinition,
-        config: T): void {
-        config.deploymentId = config.deploymentId || new Uuid(definition.deploymentId);
-        config.deploymentTimestamp = config.deploymentTimestamp || new Date(definition.deploymentTimestamp);
-    }
-
-    function defaultConvertAppConfigToDefinition<T extends AppConfig, TDefinition extends AppConfigDefinition>(
-        config: T,
-        definition: TDefinition): void {
-        definition.deploymentId = definition.deploymentId || config.deploymentId.toString();
-        definition.deploymentTimestamp = definition.deploymentTimestamp || config.deploymentTimestamp.toISOString();
-    }
-
-    export function getAppConfig<T extends AppConfig, TDefinition extends AppConfigDefinition>(
-        moduleName: ModuleName,
-        fromDefinition: (definition: TDefinition, config: T) => void): T {
+    export function getAppConfig<T extends AppConfig>(
+        moduleName: ModuleName): T {
         let appConfig: T = appConfigs.get(moduleName) as T;
         if (!appConfigs[moduleName]) {
-            let configPath = getInstanceConfigPath(moduleName).path("app.json");
-            let configDefinition: TDefinition = require(configPath.fsPath);
-            appConfig = {} as T
-            fromDefinition(configDefinition, appConfig);
-            defaultConvertAppConfigFromDefinition(configDefinition, appConfig);
+            appConfig = getInstanceConfigPath(moduleName).path("app.json").loadJsonConfig<T>();
             appConfigs.set(moduleName, appConfig);
         }
         return appConfig;
     }
 
-    export function saveAppConfig<T extends AppConfig, TDefinition extends AppConfigDefinition>(
+    export function saveAppConfig<T extends AppConfig>(
         moduleName: ModuleName,
-        appConfig: T,
-        toDefinition: (config: T, definition: TDefinition) => void): void {
+        appConfig: T): void {
 
         let configPath = getInstanceConfigPath(moduleName).path("app.json");
-        let definition: TDefinition = {} as TDefinition;
-        toDefinition(appConfig, definition);
-        defaultConvertAppConfigToDefinition(appConfig, definition);
-        configPath.ensureDirExists().saveJsonConfig(definition);
+        configPath.ensureDirExists().saveJsonConfig(appConfig);
         appConfigs.set(moduleName, appConfig);
     }
 
@@ -106,7 +77,7 @@ export module AppContext {
     const contributedUsers: Map<ModuleName, UserContributions> = new Map();
     export function contributeUser(
         moduleName: ModuleName,
-        userId: Uuid,
+        userId: string,
         userName: string,
         policies: IPolicy[]): IUser {
         let contributions = contributedUsers.get(moduleName);
@@ -120,7 +91,7 @@ export module AppContext {
     }
 
     export function newContributedUserRequestContext(moduleName: ModuleName,
-        userId: Uuid,
+        userId: string,
         resolveGroups: boolean = true): IRequestContext {
         let contributions = contributedUsers.get(moduleName);
         if (!contributions) {

@@ -1,10 +1,10 @@
 {
   "name": "wireless-guard-deploy",
-  "dependencies": {},
+  "dependencies": {
+    "sequelize": "registry:npm/sequelize#4.0.0-1+20160911001907"
+  },
   "globalDependencies": {
-    "bookshelf": "registry:dt/bookshelf#0.8.2+20160811111312",
-    "fs-extra": "registry:dt/fs-extra#0.0.0+20160517121359",
-    "knex": "registry:dt/knex#0.0.0+20160819212955",
+    "fs-extra": "registry:dt/fs-extra#0.0.0+20160907105211",
     "node": "registry:env/node#6.0.0+20160902022231"
   }
 }

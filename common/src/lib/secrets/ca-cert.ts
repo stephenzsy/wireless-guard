@@ -31,7 +31,7 @@ import {
     loadPrivateKeyFromManifest,
     Authorization as PrivateKeyAuthorizationConstants
 } from "./private-key";
-import { CertBase, getGuidSerial } from "./cert-base";
+import { CertBase, getUuidSerial } from "./cert-base";
 import {
     toPolicyReference
 } from "../policies/utils";
@@ -70,7 +70,7 @@ export async function createRootCaCertAsync(requestContext: IRequestContext,
         x509: true,
         extensions: "v3_ca",
         key: privateKey.pemFilePath.fsPath,
-        setSerial: getGuidSerial(new Uuid(manifest.id)),
+        setSerial: getUuidSerial(manifest.id),
         out: certPath.fsPath,
         digest: "sha384",
         subj: subject,
@@ -142,7 +142,7 @@ export class CaCertSuite {
             req: true,
             in: csrInputPath.fsPath,
             out: crtOutputPath.fsPath,
-            setSerial: getGuidSerial(new Uuid(manifestId)),
+            setSerial: getUuidSerial(manifestId),
             digest: "sha384",
             extfile: extFilePath.fsPath,
             extensions: "v3_req",

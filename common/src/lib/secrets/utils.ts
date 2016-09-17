@@ -1,5 +1,4 @@
 
-import Uuid from "../common/uuid";
 import { IRequestContext } from "../request-context";
 import {
     ICertSuite,
@@ -89,22 +88,22 @@ export async function createRsaClientCertificate(requestContext: IRequestContext
     };
 }
 
-export function loadPrivateKey(requestContext: IRequestContext, id: Uuid): IAsymmetricPrivateKey {
+export function loadPrivateKey(requestContext: IRequestContext, id: string): IAsymmetricPrivateKey {
     let manifest = ManifestRepo.loadManifest<IAsymmetricPrivateKeyManifest>(id, requestContext.moduleName);
     return loadPrivateKeyFromManifest(requestContext, manifest);
 };
 
-export function loadRootCaCert(requestContext: IRequestContext, id: Uuid): IRootCaCert {
+export function loadRootCaCert(requestContext: IRequestContext, id: string): IRootCaCert {
     let manifest = ManifestRepo.loadManifest<IRootCaCertManifest>(id, requestContext.moduleName);
     return loadRootCaCertFromManifest(requestContext, manifest);
 };
 
-export function loadServerCert(requestContext: IRequestContext, id: Uuid): ICertificate {
+export function loadServerCert(requestContext: IRequestContext, id: string): ICertificate {
     let manifest = ManifestRepo.loadManifest<ICertificateManifest>(id, requestContext.moduleName);
     return loadServerCertFromManifest(requestContext, manifest);
 };
 
-export function loadClientCert(requestContext: IRequestContext, id: Uuid): ICertificate {
+export function loadClientCert(requestContext: IRequestContext, id: string): ICertificate {
     let manifest = ManifestRepo.loadManifest<ICertificateManifest>(id, requestContext.moduleName);
     return loadClientCertFromManifest(requestContext, manifest);
 };

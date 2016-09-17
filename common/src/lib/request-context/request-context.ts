@@ -11,7 +11,7 @@ import {
     AuthorizeOptions,
     LogLevel,
     IService
-} from "./request-context-interface";
+} from "./interfaces";
 import UserContext from "./user-context";
 import {
     IPolicy,
@@ -22,7 +22,7 @@ import { IUser } from "../users"
 import User from "../users/user";
 
 export default class RequestContext implements IRequestContext {
-    private _requestId: Uuid;
+    private _requestId: string;
     public userContext: IUserContext;
     public moduleName: AppContext.ModuleName;
     private isElevated: boolean;
@@ -34,12 +34,12 @@ export default class RequestContext implements IRequestContext {
             this.userContext = original.userContext;
             this.moduleName = original.moduleName;
         } else {
-            this._requestId = new Uuid();
+            this._requestId = Uuid.v4();
         }
         this.isElevated = isElevated;
     }
 
-    public get requestId(): Uuid {
+    public get requestId(): string {
         return this._requestId;
     }
 
@@ -70,16 +70,16 @@ export default class RequestContext implements IRequestContext {
         return new RequestContext(this, true);
     }
 
-    public getService<T extends IService>(serviceTypeId: Uuid): T {
-        return this.services[serviceTypeId.toString()] as T;
+    public getService<T extends IService>(serviceTypeId: string): T {
+        return this.services[serviceTypeId] as T;
     }
 
     public setService<T extends IService>(service: T): void {
-        this.services[service.serviceTypeId.toString()] = service;
+        this.services[service.serviceTypeId] = service;
     }
 
     public withService<T extends IService>(service: T): this {
-        this.services[service.serviceTypeId.toString()] = service;
+        this.services[service.serviceTypeId] = service;
         return this;
     }
 }

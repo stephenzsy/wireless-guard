@@ -4,14 +4,12 @@ import User from "./user";
 export default class UserContributions {
     private contributedUsers: IDictionaryStringTo<User> = {};
 
-    public contributeUser(id: Uuid, name: string): User {
-        let idStr = id.toString();
-        this.contributedUsers[idStr] = this.contributedUsers[idStr] || new User(id, name);
-        return this.contributedUsers[idStr];
+    public contributeUser(id: string, name: string): User {
+        this.contributedUsers[id] = this.contributedUsers[id] || new User(id, name);
+        return this.contributedUsers[id];
     }
 
-    public getContributedUser(id: Uuid): User {
-        let idStr = id.toString();
-        return this.contributedUsers[idStr];
+    public getContributedUser(id: string): User {
+        return this.contributedUsers[id];
     }
 }

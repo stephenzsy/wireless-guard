@@ -1,5 +1,5 @@
 import {
-    Guid,
+    Uuid,
     AppContext,
     Users,
     Policies,
@@ -14,7 +14,7 @@ import {
 const deployAppConfig: DeployAppConfig = loadConfig();
 
 const allowAllPolicy: Policies.IPolicy = AppContext.contributePolicy({
-    id: new Guid().toString(),
+    id: Uuid.v4(),
     name: "deploy-allow-all",
     actions: "*",
     effect: "allow",

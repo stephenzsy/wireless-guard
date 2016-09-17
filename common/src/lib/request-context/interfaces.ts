@@ -1,4 +1,3 @@
-import Uuid from "../common/uuid";
 import {
     IUser,
     IUserGroup
@@ -26,11 +25,11 @@ export interface IUserContext {
 }
 
 export interface IService {
-    serviceTypeId: Uuid;
+    serviceTypeId: string;
 }
 
 export interface IRequestContext {
-    requestId: Uuid;
+    requestId: string;
     moduleName: AppContext.ModuleName;
     userContext: IUserContext;
     authorize(action: string, resource: PolicyEntityIdentifier, options?: AuthorizeOptions): IPolicyReference;
@@ -39,7 +38,7 @@ export interface IRequestContext {
      * Elevate to server request, can only be done by server
      */
     elevate(): IRequestContext;
-    getService<T extends IService>(serviceTypeId: Uuid): T;
+    getService<T extends IService>(serviceTypeId: string): T;
     setService<T extends IService>(service: T): void;
 }
 

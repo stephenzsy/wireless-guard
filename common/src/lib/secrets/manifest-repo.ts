@@ -10,7 +10,7 @@ export module SecretManifiestRepository {
     const manifestFilename: string = "manifest.json";
 
     export class ManifestDoesNotExistError extends GeneralErrors.ResourceNotExistError {
-        constructor(manifestId: Uuid) {
+        constructor(manifestId: string) {
             super(`Manifest ${manifestId.toString()} is not found.`);
         }
     }
@@ -21,7 +21,7 @@ export module SecretManifiestRepository {
     }
 
     export function initManifest(owner: IUser, moduleName: AppContext.ModuleName): IManifest {
-        let id = new Uuid();
+        let id = Uuid.v4();
         let secretDirPath = getManifestDirectory(moduleName)
             .path(id.toString());
         let manifestPath = secretDirPath.path(manifestFilename);
@@ -36,7 +36,7 @@ export module SecretManifiestRepository {
         return manifest;
     }
 
-    export function loadManifest<T extends IManifest>(id: Uuid, moduleName: AppContext.ModuleName): T {
+    export function loadManifest<T extends IManifest>(id: string, moduleName: AppContext.ModuleName): T {
         let secretDirPath = getManifestDirectory(moduleName)
             .path(id.toString());
         let manifestPath = secretDirPath.path(manifestFilename);

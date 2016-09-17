@@ -1,4 +1,3 @@
-import Uuid from "../common/uuid";
 import {
     AuthorizationErrors
 } from "../errors";
@@ -36,7 +35,7 @@ export interface PolicyEntityIdentifier {
 }
 
 export interface IPolicyReference {
-    id: Uuid;
+    id: string;
     name: string;
     allow: boolean;
 }

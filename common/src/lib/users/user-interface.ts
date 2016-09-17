@@ -1,11 +1,10 @@
-import Uuid from "../common/uuid";
 import {
     IPolicyReference,
 } from "../policies";
 import {IRequestContext} from "../request-context";
 
 export interface IUserEntityReference {
-    id: Uuid;
+    id: string;
     name: string;
 }
 

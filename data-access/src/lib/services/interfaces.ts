@@ -1,11 +1,12 @@
-import * as knex from "knex";
+import { Sequelize } from "sequelize";
+
 import {
     RequestContext,
     Secrets
 } from "wireless-guard-common"
 
 export interface IDataAccessService extends RequestContext.IService {
-    connection: knex;
+    connection: Sequelize;
 }
 
 export interface DbConfig {

@@ -1,7 +1,7 @@
 import {
     AppContext,
     ConfigPath,
-    Guid,
+    Uuid,
     Users
 } from "wireless-guard-common";
 import {
@@ -14,11 +14,11 @@ if (!AppContext.hasConfig()) {
 }
 
 let config: DeployAppConfig = {
-    deploymentId: new Guid(),
+    deploymentId: Uuid.v4(),
     deploymentTimestamp: new Date(),
-    rootUserId: new Guid(),
+    rootUserId: Uuid.v4(),
     rootUserName: "deploy@system",
-    dbUserId: new Guid(),
+    dbUserId: Uuid.v4(),
     dbUserName: "db@system"
 };
 

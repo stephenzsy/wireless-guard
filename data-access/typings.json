@@ -1,8 +1,8 @@
 {
-  "dependencies": {},
+  "dependencies": {
+    "sequelize": "registry:npm/sequelize#4.0.0-1+20160911001907"
+  },
   "globalDependencies": {
-    "bookshelf": "registry:dt/bookshelf#0.8.2+20160811111312",
-    "knex": "registry:dt/knex#0.0.0+20160819212955",
     "node": "registry:env/node#6.0.0+20160902022231"
   }
 }
