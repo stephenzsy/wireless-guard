@@ -8,6 +8,8 @@ deploy/src/**/*.js
 data-access/dist/**/*
 !data-access/dist/**/*.keep
 data-access/src/**/*.js
+webapi/dist/**/*
+!webapi/dist/**/*.keep
 typings
 *.log
 /config
