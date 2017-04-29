@@ -13,7 +13,7 @@ gulp.task("clean", function() {
 
 gulp.task("default", function() {
     let tsResult = tsProject.src()
-        .pipe(ts(tsProject));
+        .pipe(tsProject());
     return merge([
         tsResult.js.pipe(gulp.dest("dist")),
         tsResult.dts.pipe(gulp.dest("dist/typings"))
