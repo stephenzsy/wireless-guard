@@ -8,12 +8,18 @@ var tsProject = ts.createProject("tsconfig.json", {
     declaration: true
 });
 
-gulp.task("clean", function() {
+gulp.task("clean", function () {
     return del(["dist/**/*", "!dist/.keep"]);
 });
 
-gulp.task("default", function () {
+gulp.task("copy-bin", function () {
+    return gulp.src("bin/*")
+        .pipe(gulp.dest("dist/bin"));
+
+});
+
+gulp.task("default", ["copy-bin"], function () {
     return tsProject.src()
-        .pipe(ts(tsProject))
+        .pipe(tsProject())
         .js.pipe(gulp.dest("dist"));
 });

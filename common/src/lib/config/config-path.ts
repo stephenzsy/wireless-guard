@@ -4,7 +4,7 @@ import * as fse from "fs-extra";
 
 export class ConfigPath {
     private _fsPath: string;
-    constructor(joinedPath) {
+    constructor(joinedPath: string) {
         this._fsPath = joinedPath;
     }
 

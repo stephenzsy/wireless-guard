@@ -26,8 +26,8 @@ export module AppContext {
         deploymentTimestamp: Date;
     }
 
-    const settingsConfigDir: string = (process.env as WGProcessEnv).WG_SETTINGS_CONFIG_DIR;
-    const instanceConfigDir: string = (process.env as WGProcessEnv).WG_INSTANCE_CONFIG_DIR;
+    const settingsConfigDir: string = (process.env as any as WGProcessEnv).WG_SETTINGS_CONFIG_DIR;
+    const instanceConfigDir: string = (process.env as any as WGProcessEnv).WG_INSTANCE_CONFIG_DIR;
 
     var appConfigs: Map<ModuleName, AppConfig> = new Map();
 

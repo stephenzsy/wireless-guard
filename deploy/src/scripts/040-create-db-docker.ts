@@ -40,7 +40,7 @@ const serverPrivateKeyRelPath: string = "server-key.pem";
 const serverCaChainRelPath: string = "server-chain.pem";
 
 // copy server cert, private key, ca cert
-const dbCertSuite = deployAppConfig.dbServerCert;
+const dbCertSuite = deployAppConfig.dbServerCert as Secrets.ICertSuite;
 const serverCert = Secrets.loadServerCert(dbUserContext, dbCertSuite.certId);
 const serverPrivateKey = Secrets.loadPrivateKey(dbUserContext, dbCertSuite.privateKeyId);
 fsExtra.copySync(serverCert.pemFilePath.fsPath, certsDir.path(serverCertRelPath).fsPath);
@@ -60,7 +60,7 @@ const sslCnf: string = [
 const mysqlSslScriptPath = dockerDir.path("mysqld-ssl.cnf");
 mysqlSslScriptPath.writeString(sslCnf);
 
-const dbClientCertSuite = deployAppConfig.dbClientCert;
+const dbClientCertSuite = deployAppConfig.dbClientCert as Secrets.ICertSuite;
 const clientCert = Secrets.loadClientCert(dbUserContext, dbClientCertSuite.certId);
 const clientPrivateKey = Secrets.loadPrivateKey(dbUserContext, dbClientCertSuite.privateKeyId);
 const password: string = (crypto.randomBytes(32) as Buffer).toString("hex");
@@ -92,7 +92,7 @@ dockerRunScriptPath.writeString(runScript);
 const dbConfig: DbConfig = {
     host: "0.0.0.0",
     port: 13306,
-    database: null,
+    database: "",
     username: "root",
     password: password,
     sslCertSuite: {

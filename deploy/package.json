@@ -4,7 +4,8 @@
   "description": "Deploy utils of Wireless Guard",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "wg-init-deployment": "./dist/bin/wg-init-deployment"
   },
   "author": "",
   "license": "MIT",
@@ -20,9 +21,10 @@
   "devDependencies": {
     "del": "^2.2.2",
     "gulp": "^3.9.1",
-    "gulp-tslint": "^6.1.1",
-    "gulp-typescript": "^2.13.6",
-    "merge2": "^1.0.2",
-    "tslint": "^3.15.1"
+    "gulp-tslint": "^6.1.3",
+    "gulp-typescript": "^3.1.6",
+    "merge2": "^1.0.3",
+    "tslint": "^3.15.1",
+    "typescript": "^2.3.2"
   }
 }

@@ -2,7 +2,7 @@ import {
     AppContext,
     ConfigPath,
     RequestContext,
-    Secrets
+    Secrets,
 } from "wireless-guard-common";
 import {
     rootUser,
@@ -35,7 +35,7 @@ const rootUserContext = AppContext.newContributedUserRequestContext("deploy", ro
 async function configureServerCertificate(): Promise<Secrets.ICertSuite> {
     return Secrets.createRsaServerCertificateSuite(dbUserContext,
         rootUserContext,
-        deployAppConfig.dbCaCert,
+        deployAppConfig.dbCaCert as Secrets.ICertSuite,
         dbServerCertConfig.days,
         dbServerCertSubject.subject);
 }
@@ -43,7 +43,7 @@ async function configureServerCertificate(): Promise<Secrets.ICertSuite> {
 async function configureClientCertificate(): Promise<Secrets.ICertSuite> {
     return Secrets.createRsaClientCertificate(dbUserContext,
         rootUserContext,
-        deployAppConfig.dbCaCert,
+        deployAppConfig.dbCaCert as Secrets.ICertSuite,
         dbClientCertConfig.days,
         dbClientCertSubject.subject);
 }
