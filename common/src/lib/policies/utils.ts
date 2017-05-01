@@ -1,5 +1,7 @@
 import {
-    PolicyDefinitionMatch,
+    PolicyDefinitionMatch
+} from "./policy-definition";
+import {
     IdentifierType,
     toIdentifierType,
     PolicyEntityIdentifier,
@@ -10,7 +12,7 @@ import {
 export type MatchWithAllDefinition<T> = "*" | T;
 
 export interface IMatcher<T> {
-    match(identifier: T): boolean;
+    matches(identifier: T): boolean;
 }
 
 abstract class MatchAllMatcher<T> implements IMatcher<T> {
@@ -19,7 +21,7 @@ abstract class MatchAllMatcher<T> implements IMatcher<T> {
         this._isMatchAll = (matchRule === "*");
     }
 
-    public match(identifier: T): boolean {
+    public matches(identifier: T): boolean {
         return this.isMatchAll;
     }
 
@@ -42,8 +44,8 @@ class MultipleStringsMatcher extends MatchAllMatcher<string>  {
     /**
      * @override
      */
-    public match(identifier: string): boolean {
-        if (super.match(identifier)) {
+    public matches(identifier: string): boolean {
+        if (super.matches(identifier)) {
             return true;
         }
         return !!this.matchedStrings.get(identifier);
@@ -62,8 +64,8 @@ class SingleValueMatcher<T extends string | IdentifierType> extends MatchAllMatc
     /**
      * @override
      */
-    public match(identifier: T): boolean {
-        if (super.match(identifier)) {
+    public matches(identifier: T): boolean {
+        if (super.matches(identifier)) {
             return true;
         }
         return this.matchedValue === identifier;
@@ -90,14 +92,14 @@ class PolicyEntityIdentifierMatcher implements IMatcher<PolicyEntityIdentifier> 
         this.identifierMatcher = new SingleValueMatcher<string>(entityType);
     }
 
-    public match(identifier: PolicyEntityIdentifier): boolean {
-        if (!this.typeMatcher.match(identifier.type)) {
+    public matches(identifier: PolicyEntityIdentifier): boolean {
+        if (!this.typeMatcher.matches(identifier.type)) {
             return false;
         }
-        if (!this.identifierTypeMatcher.match(identifier.identifierType)) {
+        if (!this.identifierTypeMatcher.matches(identifier.identifierType)) {
             return false;
         }
-        return this.identifierMatcher.match(identifier.identifier);
+        return this.identifierMatcher.matches(identifier.identifier);
     }
 }
 
@@ -124,8 +126,8 @@ class PolicyDefinitionMatcher extends MatchAllMatcher<PolicyEntityIdentifier> {
     /**
      * @override
      */
-    public match(identifier: PolicyEntityIdentifier) {
-        if (super.match(identifier)) {
+    public matches(identifier: PolicyEntityIdentifier) {
+        if (super.matches(identifier)) {
             return true;
         }
     }

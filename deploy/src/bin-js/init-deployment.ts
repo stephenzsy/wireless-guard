@@ -68,9 +68,15 @@ class Command extends BaseCommand<IOpts> {
 
             console.log("Created deployment: " + deployment.id);
         }
+
+        let usersDir = configPath.path("users").ensureDirExists();
+
     }
 }
 
 export function exec() {
-    new Command().exec();
+    let argv = process.argv;
+    argv.shift();
+    argv.shift();
+    new Command(argv).exec();
 }

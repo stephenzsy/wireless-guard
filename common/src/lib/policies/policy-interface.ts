@@ -2,21 +2,6 @@ import {
     AuthorizationErrors
 } from "../errors";
 
-export type PolicyDefinitionMatch = "*" | string[];
-export type PolicyDefinitionEffect = "allow" | "deny";
-
-/**
- * Policy definition JSON writable
- */
-export interface PolicyDefinition {
-    id: string;
-    name: string;
-    actions: PolicyDefinitionMatch;
-    effect: PolicyDefinitionEffect;
-    users?: PolicyDefinitionMatch;
-    resources?: PolicyDefinitionMatch;
-}
-
 export enum IdentifierType {
     Id
 }
@@ -41,5 +26,5 @@ export interface IPolicyReference {
 }
 
 export interface IPolicy extends IPolicyReference {
-    match(action: string, userIdentifier: PolicyEntityIdentifier, resourceIdentifier: PolicyEntityIdentifier): boolean;
+    matches(action: string, userIdentifier: PolicyEntityIdentifier, resourceIdentifier: PolicyEntityIdentifier): boolean;
 }

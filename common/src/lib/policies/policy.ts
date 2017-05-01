@@ -1,7 +1,9 @@
 import {
     PolicyDefinition,
     PolicyDefinitionEffect,
-    PolicyDefinitionMatch,
+    PolicyDefinitionMatch
+} from "./policy-definition";
+import {
     IPolicy,
     PolicyEntityIdentifier
 } from "./policy-interface";
@@ -51,14 +53,14 @@ export default class Policy implements IPolicy {
         return this._allow;
     }
 
-    public match(action: string, userIdentifier: PolicyEntityIdentifier, resourceIdentifier: PolicyEntityIdentifier): boolean {
-        if (!this.actionsMatcher.match(action)) {
+    public matches(action: string, userIdentifier: PolicyEntityIdentifier, resourceIdentifier: PolicyEntityIdentifier): boolean {
+        if (!this.actionsMatcher.matches(action)) {
             return false;
         }
-        if (this.usersMatcher && !this.usersMatcher.match(userIdentifier)) {
+        if (this.usersMatcher && !this.usersMatcher.matches(userIdentifier)) {
             return false;
         }
-        if (this.resourcesMatcher && !this.resourcesMatcher.match(resourceIdentifier)) {
+        if (this.resourcesMatcher && !this.resourcesMatcher.matches(resourceIdentifier)) {
             return false;
         }
         return true;
