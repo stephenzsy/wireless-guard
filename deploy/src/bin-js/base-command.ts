@@ -1,7 +1,7 @@
 import * as process from "process";
 
 export abstract class BaseCommand<TOpt> {
-    protected options: TOpt;
+    protected readonly options: TOpt;
     constructor(args: string[]) {
         this.options = this.parseArgs(args);
     }

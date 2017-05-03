@@ -126,10 +126,11 @@ class PolicyDefinitionMatcher extends MatchAllMatcher<PolicyEntityIdentifier> {
     /**
      * @override
      */
-    public matches(identifier: PolicyEntityIdentifier) {
+    public matches(identifier: PolicyEntityIdentifier): boolean {
         if (super.matches(identifier)) {
             return true;
         }
+        return false;
     }
 }
 

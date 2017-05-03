@@ -72,7 +72,7 @@ function authorizeReadPrivateKeyRequest(requestContext: IRequestContext, manifes
         },
         { requireElevated: true });
     if (manifest.ownerId !== requestContext.userContext.user.id.toString()) {
-        throw new PolicyDeniedError(null, "Only owner of the private key can read private key: " + manifest.id.toString());
+        throw new PolicyDeniedError(undefined, "Only owner of the private key can read private key: " + manifest.id.toString());
     }
 }
 

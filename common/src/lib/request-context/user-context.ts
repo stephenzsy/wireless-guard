@@ -31,7 +31,7 @@ export default class UserContext implements IUserContext {
         return this._groups;
     }
 
-    public evalPolicies(action: string, resource: PolicyEntityIdentifier): IPolicyReference {
+    public evalPolicies(action: string, resource: PolicyEntityIdentifier): IPolicyReference | null {
         let result = this._user.evalPolicies(action, resource);
         if (result) {
             return result;

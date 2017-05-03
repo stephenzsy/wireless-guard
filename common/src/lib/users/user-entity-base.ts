@@ -34,7 +34,7 @@ export abstract class UserEntityBase implements IUserEntity {
      */
     public get policies(): IPolicyReference[] {
         if (!this._policies) {
-            return null;
+            return [];
         }
         return this._policies.map(toPolicyReference);
     }
@@ -43,12 +43,12 @@ export abstract class UserEntityBase implements IUserEntity {
         this._policies = value;
     }
 
-    public evalPolicies(action: string, resource: PolicyEntityIdentifier): IPolicyReference {
+    public evalPolicies(action: string, resource: PolicyEntityIdentifier): IPolicyReference | null {
         if (!this._policies) {
             return null;
         }
         for (let policy of this._policies) {
-            if (policy.match(action,
+            if (policy.matches(action,
                 {
                     type: "user",
                     identifierType: IdentifierType.Id,

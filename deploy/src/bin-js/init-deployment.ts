@@ -1,4 +1,5 @@
 import * as process from "process";
+import * as crypto from "crypto";
 
 import {
     IDeployment,
@@ -68,9 +69,6 @@ class Command extends BaseCommand<IOpts> {
 
             console.log("Created deployment: " + deployment.id);
         }
-
-        let usersDir = configPath.path("users").ensureDirExists();
-
     }
 }
 

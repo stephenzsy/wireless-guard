@@ -43,7 +43,7 @@ export default class RequestContext implements IRequestContext {
         return this._requestId;
     }
 
-    public authorize(action: string, resource: PolicyEntityIdentifier, options: AuthorizeOptions = {}): IPolicyReference {
+    public authorize(action: string, resource: PolicyEntityIdentifier, options: AuthorizeOptions = {}): IPolicyReference | null {
         if (options.allowAnonymous) {
             return null;
         }
@@ -55,8 +55,9 @@ export default class RequestContext implements IRequestContext {
         }
         let result = this.userContext.evalPolicies(action, resource);
         if (!result || !result.allow) {
-            throw new PolicyDeniedError(result);
+            throw new PolicyDeniedError(result === null ? undefined : result);
         }
+        return null;
     }
 
     public log(level: LogLevel, message: string) {

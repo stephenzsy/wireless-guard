@@ -10,7 +10,12 @@ export interface ICaCommandArgs {
 }
 
 export default class Command extends BaseCommand<ICaCommandArgs> {
-    public exec():void {
+    public exec(): void {
+    }
 
+    public parseArgs(args: string[]): ICaCommandArgs {
+        return {
+            mode: CommandMode.createOrUpdate
+        };
     }
 }
