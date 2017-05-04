@@ -1,15 +1,25 @@
-import { IPrincipal } from "./interfaces";
+import { IPrincipal, IPrincipalManifest, PrincipalType } from "./interfaces";
+import { BaseResource } from "../common/base-resource";
+export abstract class BasePrincipal extends BaseResource implements IPrincipal {
 
-export abstract class BasePrincipal implements IPrincipal {
-    constructor() {
+    private readonly _type: PrincipalType;
 
+    constructor(manifest: IPrincipalManifest) {
+        super(manifest);
+        switch (manifest.type) {
+            case "user":
+                this._type = PrincipalType.user;
+                break;
+            case "group":
+                this._type = PrincipalType.group;
+                break;
+            case "service":
+                this._type = PrincipalType.service;
+                break;
+        }
     }
 
-    public get id(): string {
-        return "";
-    }
-
-    public get name(): string {
-        return "";
+    public get type(): PrincipalType {
+        return this._type;
     }
 }
