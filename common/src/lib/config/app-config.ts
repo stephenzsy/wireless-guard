@@ -8,7 +8,7 @@ export class AppConfig {
 
     constructor(rootConfigPath: ConfigPath) {
         this.root = rootConfigPath;
-        this._principals = new PrincipalsConfig();
+        this._principals = new PrincipalsConfig(rootConfigPath);
     }
 
     public get principals(): PrincipalsConfig {
@@ -21,7 +21,7 @@ export class ExtendedAppConfig extends AppConfig {
 
     constructor(rootConfigPath: ConfigPath) {
         super(rootConfigPath);
-        this._extendedPrincipals = new ExtendedPrincipalsConfig();
+        this._extendedPrincipals = new ExtendedPrincipalsConfig(rootConfigPath);
     }
 
     public get principals(): ExtendedPrincipalsConfig {

@@ -4,7 +4,9 @@ import * as crypto from "crypto";
 import {
     IDeployment,
     ConfigPath,
-    Uuid
+    Uuid,
+    Config,
+    Principals
 } from "wireless-guard-common";
 
 import {
@@ -14,6 +16,8 @@ import {
 interface IOpts {
     dir: string;
 }
+
+type WellKnownServiceIdentifier = "deploy";
 
 class Command extends BaseCommand<IOpts> {
 
@@ -68,6 +72,18 @@ class Command extends BaseCommand<IOpts> {
                 .saveJsonConfig(deployment);
 
             console.log("Created deployment: " + deployment.id);
+        }
+
+        // initialize service principal
+        let appConfig = new Config.ExtendedAppConfig(configPath);
+        let servicePrincipal = appConfig.principals.getWellKnownServicePrincipal<WellKnownServiceIdentifier>("deploy", true);
+        if (servicePrincipal) {
+            console.log("Loaded service principal: " + servicePrincipal.id);
+        } else {
+            servicePrincipal = appConfig.principals.contributeServicePrincipal<WellKnownServiceIdentifier>(
+                "deploy",
+                Principals.newServicePrincipalManifest("deploy"));
+            console.log("Created service principal: " + servicePrincipal.id);
         }
     }
 }

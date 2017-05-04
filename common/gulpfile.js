@@ -8,11 +8,16 @@ var tsProject = ts.createProject("tsconfig.json", {
     declaration: true
 });
 
-gulp.task("clean", function() {
+gulp.task("clean", function () {
     return del(["dist/**/*", "!dist/.keep"]);
 });
 
-gulp.task("default", function() {
+gulp.task("copy-dts", function () {
+    return gulp.src("src/lib/*.d.ts")
+        .pipe(gulp.dest("dist/typings/lib"));
+})
+
+gulp.task("default", ["copy-dts"], function () {
     let tsResult = tsProject.src()
         .pipe(tslint())
         .pipe(tsProject());

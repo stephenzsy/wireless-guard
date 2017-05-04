@@ -19,6 +19,7 @@
     "wireless-guard-common": "^0.0.1"
   },
   "devDependencies": {
+    "@types/node": "^7.0.16",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-tslint": "^6.1.3",
