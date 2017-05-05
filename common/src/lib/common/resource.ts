@@ -14,6 +14,10 @@ export interface IResource {
      * Timestamp of when the resource is created
      */
     readonly dateCreated: Date;
+    /**
+     * Manifest of the resource
+     */
+    readonly manifest: IResourceManifest;
 }
 
 /**

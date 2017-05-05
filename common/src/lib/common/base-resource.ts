@@ -1,10 +1,10 @@
 import { IResource, IResourceManifest } from "./resource";
 
-export class BaseResource implements IResource {
-    protected readonly manifest;
+export class BaseResource<M extends IResourceManifest = IResourceManifest> implements IResource {
+    private readonly _manifest: M;
 
-    constructor(manifest: IResourceManifest) {
-        this.manifest = manifest;
+    constructor(manifest: M) {
+        this._manifest = manifest;
     }
 
     public get id(): string {
@@ -17,5 +17,9 @@ export class BaseResource implements IResource {
 
     public get dateCreated(): Date {
         return this.manifest.dateCreated;
+    }
+
+    public get manifest(): M {
+        return this._manifest;
     }
 }

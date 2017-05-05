@@ -1,4 +1,5 @@
-import { IResource } from "../common/resource";
+import { IResource, IResourceManifest } from "../common/resource";
+import { IPrincipal } from "../principals/interfaces";
 
 export enum PolicyEffect {
     /**
@@ -11,32 +12,42 @@ export enum PolicyEffect {
     allow = 1,
 }
 
-export interface IPolicyMatcher<T> {
+export type EffectManifest = "deny" | "allow";
+
+export interface IPolicyMatcher<T, M> {
+    manifest: M;
     matches(target: T): boolean;
 }
 
-export interface IPolicyPrincipalsMatcher<P> {
+export interface IPolicyPrincipalsMatcher<P extends IPrincipal, M> extends IPolicyMatcher<P, M> {
 }
 
-export interface IPolicyActionsMatcher<A> {
+export interface IPolicyActionsMatcher<A, M> extends IPolicyMatcher<A, M> {
 }
 
-export interface IPolicyResourcesMatcher<R> extends IPolicyMatcher<R> {
+export interface IPolicyResourcesMatcher<R extends IResource, M> extends IPolicyMatcher<R, M> {
 }
 
-export interface IPolicy<P, A, R> extends IResource {
+export interface IPolicyManifest<P, A, R> extends IResourceManifest {
+    principals: P;
+    actions: A;
+    resources: R;
+    effect: EffectManifest;
+}
+
+export interface IPolicy<P extends IPrincipal, A, R extends IResource> extends IResource {
     /**
      * Matcher for principals
      */
-    readonly principals: IPolicyPrincipalsMatcher<P>;
+    readonly principals: IPolicyPrincipalsMatcher<P, any>;
     /**
      * Matcher for actions
      */
-    readonly actions: IPolicyActionsMatcher<A>;
+    readonly actions: IPolicyActionsMatcher<A, any>;
     /**
      * Matcher for resources
      */
-    readonly resources: IPolicyResourcesMatcher<R>;
+    readonly resources: IPolicyResourcesMatcher<R, any>;
     /**
      * Effect of the policy
      */

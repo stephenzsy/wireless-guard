@@ -1,10 +1,13 @@
 /// <reference path="../types.d.ts" />
 
 import { ConfigPath } from "./config-path";
+import { IPrincipal } from "../principals/interfaces";
+import { PrincipalsStore } from "../principals/principals-store";
 import { IServicePrincipal, ServicePrincipal, IServicePrincipalManifest } from "../principals/service-principal";
 
 export class PrincipalsConfig {
     protected configPath: ConfigPath;
+    protected store: PrincipalsStore;
     protected wellKnownServicePrincipals: StringMap<IServicePrincipal> = {};
 
     constructor(configPath: ConfigPath) {
@@ -24,6 +27,7 @@ export class PrincipalsConfig {
                         .loadJsonConfig<IServicePrincipalManifest>();
                     currentPrincipal = new ServicePrincipal(manifest);
                     this.wellKnownServicePrincipals[identifier] = currentPrincipal;
+                    this.store.add(currentPrincipal);
                 } catch (e) {
                     // does not exist
                     currentPrincipal = undefined;
@@ -31,6 +35,10 @@ export class PrincipalsConfig {
             }
         }
         return currentPrincipal;
+    }
+
+    public resolvePrincipal(principalId: string): IPrincipal | undefined {
+        return this.store.resolve(principalId);
     }
 }
 
@@ -43,6 +51,7 @@ export class ExtendedPrincipalsConfig extends PrincipalsConfig {
             throw "Well known service principal already exists for identifier: " + identifier;
         }
         let principal = this.wellKnownServicePrincipals[identifier] = new ServicePrincipal(manifest);
+        this.store.add(principal);
         this.configPath.path(identifier + ".json")
             .ensureDirExists()
             .saveJsonConfig<IServicePrincipalManifest>(manifest);
