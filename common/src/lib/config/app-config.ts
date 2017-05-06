@@ -1,22 +1,38 @@
 import { ConfigPath } from "./config-path";
 import { IServicePrincipal } from "../principals/service-principal";
 import { PrincipalsConfig, ExtendedPrincipalsConfig } from "./principals-config";
+import { MaterialsConfig } from "./materials-config";
 
-export class AppConfig {
+export interface IAppConfig {
+    readonly principals: PrincipalsConfig;
+    readonly materials: MaterialsConfig;
+}
+
+export interface IExtendedAppConfig extends IAppConfig {
+    readonly principals: ExtendedPrincipalsConfig;
+}
+
+class AppConfig implements IAppConfig {
     private readonly root: ConfigPath;
     private readonly _principals: PrincipalsConfig;
+    private readonly _materials: MaterialsConfig;
 
     constructor(rootConfigPath: ConfigPath) {
         this.root = rootConfigPath;
         this._principals = new PrincipalsConfig(rootConfigPath);
+        this._materials = new MaterialsConfig(rootConfigPath);
     }
 
     public get principals(): PrincipalsConfig {
         return this._principals;
     }
+
+    public get materials(): MaterialsConfig {
+        return this._materials;
+    }
 }
 
-export class ExtendedAppConfig extends AppConfig {
+class ExtendedAppConfig extends AppConfig implements IExtendedAppConfig {
     private readonly _extendedPrincipals: ExtendedPrincipalsConfig;
 
     constructor(rootConfigPath: ConfigPath) {
@@ -27,4 +43,26 @@ export class ExtendedAppConfig extends AppConfig {
     public get principals(): ExtendedPrincipalsConfig {
         return this._extendedPrincipals;
     }
+}
+
+var appConfig: AppConfig;
+
+export function initAppConfig(path: string): IAppConfig {
+    if (!appConfig) {
+        appConfig = new AppConfig(new ConfigPath(path));
+    }
+    return appConfig;
+}
+
+export function initExtendedAppConfig(path: string): IExtendedAppConfig {
+    if (!appConfig) {
+        appConfig = new ExtendedAppConfig(new ConfigPath(path));
+    } else if (appConfig instanceof ExtendedAppConfig) {
+        return appConfig;
+    }
+    throw "AppConfig initialized is not extended";
+}
+
+export function getAppConfig(): IAppConfig {
+    return appConfig;
 }

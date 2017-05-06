@@ -1,13 +1,52 @@
+/// <reference path="../types.d.ts"/>
+
+import { WGOpenssl } from "wireless-guard-openssl";
+
+import { Uuid } from "../common/uuid";
 import { PrincipalsConfig } from "../config/principals-config";
-import { IMaterial, IMaterialManifest } from "./interfaces";
+import { IMaterial, IMaterialManifest, MaterialsAuthorizationAction } from "./interfaces";
 import { BaseMaterial } from "./base-material";
+import { IPolicy } from "../policies/interfaces";
 import { BasePolicy } from "../policies/base-policy";
+import { requireServicePrincipalPolicy } from "../policies/policies";
 import { IRequest } from "../request/interfaces";
-export interface IPrivateKey extends IMaterial {
+import { IPrincipal } from "../principals/interfaces";
+import { authorizeRequest } from "../authorization/authorization-helper";
+import { IExtendedAppConfig, getAppConfig } from "../config/app-config";
+
+export enum PrivateKeyUsage {
+    ca,
+    server,
+    client
 }
 
-export interface IAsymmetricPrivateKeyManifest extends IMaterialManifest {
+export type PrivateKeyUsageManifest = "ca" | "server" | "client";
+
+function toPrivateKeyUsage(manifest: PrivateKeyUsageManifest): PrivateKeyUsage {
+    switch (manifest) {
+        case "ca":
+            return PrivateKeyUsage.ca;
+        case "server":
+            return PrivateKeyUsage.server;
+        case "client":
+            return PrivateKeyUsage.client;
+    }
+}
+
+function toPrivateKeyUsageManifest(usage: PrivateKeyUsage): PrivateKeyUsageManifest {
+    switch (usage) {
+        case PrivateKeyUsage.ca:
+            return "ca";
+        case PrivateKeyUsage.server:
+            return "server";
+        case PrivateKeyUsage.client:
+            return "client";
+    }
+}
+
+interface IAsymmetricPrivateKeyManifest extends IMaterialManifest {
     algorithm: "ec" | "rsa";
+    usage: PrivateKeyUsageManifest;
     pemFilePath: string;
 }
 
@@ -15,43 +54,75 @@ interface IEcPrivateKeyManifest extends IAsymmetricPrivateKeyManifest {
     curve: "secp384r1";
 }
 
-export class AsymmetricPrivateKey<T extends IAsymmetricPrivateKeyManifest> extends BaseMaterial<T> {
-    constructor(principalsConfig: PrincipalsConfig, manifest: T) {
-        super(principalsConfig, manifest);
+interface IAsymmetricPrivateKey extends IMaterial {
+    readonly usage: PrivateKeyUsage;
+}
+
+function getPrivateKeyIdentifier(usage: PrivateKeyUsage, id: string) {
+    return "private-key:" + toPrivateKeyUsageManifest(usage) + ":" + id;
+}
+
+class AsymmetricPrivateKey<T extends IAsymmetricPrivateKeyManifest> extends BaseMaterial<T> implements IAsymmetricPrivateKey {
+    private readonly _usage: PrivateKeyUsage;
+
+    constructor(manifest: T) {
+        super(manifest);
+        this._usage = toPrivateKeyUsage(manifest.usage);
+    }
+
+    public get usage(): PrivateKeyUsage {
+        return this._usage;
+    }
+
+    public get identifier(): string {
+        return getPrivateKeyIdentifier(this.usage, this.id);
     }
 }
 
-export class EcPrivateKey extends AsymmetricPrivateKey<IEcPrivateKeyManifest> {
-    constructor(principalsConfig: PrincipalsConfig, manifest: IEcPrivateKeyManifest) {
-        super(principalsConfig, manifest);
+class EcPrivateKey extends AsymmetricPrivateKey<IEcPrivateKeyManifest> {
+    constructor(manifest: IEcPrivateKeyManifest) {
+        super(manifest);
     }
 }
 
-function authorizeCreatePrivateKeyRequest(request: IRequest) {
-    requestContext.authorize(
-        AuthorizationConstants.Action.createSecret,
-        {
-            type: Authorization.typePrivateKey,
-            identifierType: IdentifierType.Id,
-            identifier: "*"
-        },
-        { requireElevated: true });
-}
+namespace Authorization {
+    const createRequireSpecificPolicies: StringMap<IPolicy<IPrincipal, MaterialsAuthorizationAction>> = {};
 
-export async function newEcPrivateKeyAsync(request: IRequest): Promise<EcPrivateKey> {
-    authorizeCreatePrivateKeyRequest(request);
+    function authorizeCreatePrivateKeyRequest(request: IRequest, usage: PrivateKeyUsage) {
+        let authorizationResult = authorizeRequest<MaterialsAuthorizationAction>(
+            request,
+            "create",
+            getPrivateKeyIdentifier(usage, "*"), [
+                requireServicePrincipalPolicy
+            ]);
+        if (!authorizationResult.authorized) {
+            throw authorizationResult;
+        }
+    }
 
-    let manifest: IEcManifest = ManifestRepo.initManifest(requestContext.userContext.user,
-        requestContext.moduleName) as IEcManifest;
-    manifest.algorithm = "ec";
-    manifest.curve = "secp384r1";
-    let privateKeyPath = new ConfigPath(manifest.secretsDirPath).path("key.pem");
-    await WGOpenssl.ecparam({
-        out: privateKeyPath.fsPath
-    });
-    manifest.pemFilePath = privateKeyPath.fsPath;
-    // store new manifest
-    new ConfigPath(manifest.manifestPath).saveJsonConfig(manifest);
-    requestContext.log("info", "Created private key: " + manifest.id);
-    return new EcPrivateKey(manifest);
+    export async function newEcPrivateKeyManifestAsync(request: IRequest, name: string, usage: PrivateKeyUsage): Promise<IEcPrivateKeyManifest> {
+        authorizeCreatePrivateKeyRequest(request, usage);
+
+        let id: string = Uuid.v4();
+        let dirPath = getAppConfig().materials.getMaterialConfigPath(id);
+        let keyFsPath: string = dirPath.path("key.pem").fsPath;
+
+        let manifest: IEcPrivateKeyManifest = {
+            id: id,
+            name: name,
+            dateCreated: new Date(),
+            owner: request.authenticationContext.principal.id,
+            curve: "secp384r1",
+            algorithm: "ec",
+            usage: toPrivateKeyUsageManifest(usage),
+            pemFilePath: keyFsPath
+        }
+
+        // create key.pem
+        await WGOpenssl.ecparam({
+            out: keyFsPath
+        });
+
+        return manifest;
+    }
 }

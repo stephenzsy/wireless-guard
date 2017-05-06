@@ -5,6 +5,10 @@ export interface IRequestAuthenticationContext {
     /**
      * Authenticated principal of the requester
      */
+    principal; IPrincipal;
+    /**
+     * Authenticated principal of the original requester
+     */
     callerPrincipal: IPrincipal;
 }
 

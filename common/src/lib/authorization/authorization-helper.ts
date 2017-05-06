@@ -4,15 +4,13 @@ import { IAutorizationContext } from "./interfaces";
 import { IPolicy } from "../policies/interfaces";
 import { denyAllPolicy } from "../policies/policies";
 
-export class AuthorizationHelper {
-    public authorizeRequest<A, R extends IResource>(
-        request: IRequest,
-        action: A,
-        resource: R,
-        resourcePolicies: IPolicy<any, A, R>[]): IAutorizationContext {
-        return {
-            authorized: false,
-            deinedPolicy: denyAllPolicy
-        };
-    }
+export function authorizeRequest<A>(
+    request: IRequest,
+    action: A,
+    resourceIdentifier: string,
+    resourcePolicies: IPolicy<any, A>[] = []): IAutorizationContext {
+    return {
+        authorized: false,
+        deinedPolicy: denyAllPolicy
+    };
 }

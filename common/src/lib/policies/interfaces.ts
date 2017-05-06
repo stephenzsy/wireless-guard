@@ -25,7 +25,7 @@ export interface IPolicyPrincipalsMatcher<P extends IPrincipal, M> extends IPoli
 export interface IPolicyActionsMatcher<A, M> extends IPolicyMatcher<A, M> {
 }
 
-export interface IPolicyResourcesMatcher<R extends IResource, M> extends IPolicyMatcher<R, M> {
+export interface IPolicyResourcesMatcher<M> extends IPolicyMatcher<string, M> {
 }
 
 export interface IPolicyManifest<P, A, R> extends IResourceManifest {
@@ -35,7 +35,7 @@ export interface IPolicyManifest<P, A, R> extends IResourceManifest {
     effect: EffectManifest;
 }
 
-export interface IPolicy<P extends IPrincipal, A, R extends IResource> extends IResource {
+export interface IPolicy<P extends IPrincipal = IPrincipal, A = any> extends IResource {
     /**
      * Matcher for principals
      */
@@ -47,7 +47,7 @@ export interface IPolicy<P extends IPrincipal, A, R extends IResource> extends I
     /**
      * Matcher for resources
      */
-    readonly resources: IPolicyResourcesMatcher<R, any>;
+    readonly resources: IPolicyResourcesMatcher<any>;
     /**
      * Effect of the policy
      */

@@ -10,16 +10,16 @@ import {
     IPolicyResourcesMatcher
 } from "./interfaces";
 
-export class BasePolicy<P extends IPrincipal, A, R extends IResource> extends BaseResource implements IPolicy<P, A, R> {
+export class BasePolicy<P extends IPrincipal, A> extends BaseResource implements IPolicy<P, A> {
     private readonly _principals: IPolicyPrincipalsMatcher<P, any>;
     private readonly _actions: IPolicyActionsMatcher<A, any>;
-    private readonly _resources: IPolicyResourcesMatcher<R, any>;
+    private readonly _resources: IPolicyResourcesMatcher<any>;
     private readonly _effect: PolicyEffect;
 
     constructor(manifest: IPolicyManifest<any, any, any>,
         principals: IPolicyPrincipalsMatcher<P, any>,
         actions: IPolicyActionsMatcher<A, any>,
-        resources: IPolicyResourcesMatcher<R, any>) {
+        resources: IPolicyResourcesMatcher<any>) {
         super(manifest);
         switch (manifest.effect) {
             case "deny":
@@ -42,11 +42,15 @@ export class BasePolicy<P extends IPrincipal, A, R extends IResource> extends Ba
         return this._actions;
     }
 
-    public get resources(): IPolicyResourcesMatcher<R, any> {
+    public get resources(): IPolicyResourcesMatcher<any> {
         return this._resources;
     }
 
     public get effect(): PolicyEffect {
         return this._effect;
+    }
+
+    public get identifier(): string {
+        return "policy:" + this.id;
     }
 }

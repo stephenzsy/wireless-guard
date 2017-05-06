@@ -45,11 +45,7 @@ export class PrincipalsConfig {
 export class ExtendedPrincipalsConfig extends PrincipalsConfig {
     public contributeServicePrincipal<T extends string>(
         identifier: T,
-        manifest: IServicePrincipalManifest,
-        overwrite: boolean = false): IServicePrincipal {
-        if (this.wellKnownServicePrincipals[identifier] && !overwrite) {
-            throw "Well known service principal already exists for identifier: " + identifier;
-        }
+        manifest: IServicePrincipalManifest): IServicePrincipal {
         let principal = this.wellKnownServicePrincipals[identifier] = new ServicePrincipal(manifest);
         this.store.add(principal);
         this.configPath.path(identifier + ".json")

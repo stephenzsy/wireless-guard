@@ -1,6 +1,6 @@
 import { IResource, IResourceManifest } from "./resource";
 
-export class BaseResource<M extends IResourceManifest = IResourceManifest> implements IResource {
+export abstract class BaseResource<M extends IResourceManifest = IResourceManifest> implements IResource {
     private readonly _manifest: M;
 
     constructor(manifest: M) {
@@ -22,4 +22,6 @@ export class BaseResource<M extends IResourceManifest = IResourceManifest> imple
     public get manifest(): M {
         return this._manifest;
     }
+
+    public abstract get identifier(): string;
 }
