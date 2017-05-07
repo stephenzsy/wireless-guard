@@ -6,9 +6,9 @@ import { Uuid } from "../common/uuid";
 import { PrincipalsConfig } from "../config/principals-config";
 import { IMaterial, IMaterialManifest, MaterialsAuthorizationAction } from "./interfaces";
 import { BaseMaterial } from "./base-material";
-import { IPolicy } from "../policies/interfaces";
-import { BasePolicy } from "../policies/base-policy";
-import { requireServicePrincipalPolicy } from "../policies/policies";
+import { IResourcePolicy, IResourcePolicyManifest } from "../policies/interfaces";
+import { Policy } from "../policies/base-policy";
+import { requireServicePrincipalResourePolicy } from "../policies/policies";
 import { IRequest } from "../request/interfaces";
 import { IPrincipal } from "../principals/interfaces";
 import { authorizeRequest } from "../authorization/authorization-helper";
@@ -86,14 +86,13 @@ class EcPrivateKey extends AsymmetricPrivateKey<IEcPrivateKeyManifest> {
 }
 
 namespace Authorization {
-    const createRequireSpecificPolicies: StringMap<IPolicy<IPrincipal, MaterialsAuthorizationAction>> = {};
 
     function authorizeCreatePrivateKeyRequest(request: IRequest, usage: PrivateKeyUsage) {
         let authorizationResult = authorizeRequest<MaterialsAuthorizationAction>(
             request,
             "create",
             getPrivateKeyIdentifier(usage, "*"), [
-                requireServicePrincipalPolicy
+                requireServicePrincipalResourePolicy
             ]);
         if (!authorizationResult.authorized) {
             throw authorizationResult;
@@ -105,23 +104,40 @@ namespace Authorization {
 
         let id: string = Uuid.v4();
         let dirPath = getAppConfig().materials.getMaterialConfigPath(id);
-        let keyFsPath: string = dirPath.path("key.pem").fsPath;
+        let keyFsPath: string = dirPath
+            .ensureDirExists()
+            .path("key.pem").fsPath;
+        let ownerId: string = request.authenticationContext.principal.id;
 
         let manifest: IEcPrivateKeyManifest = {
             id: id,
             name: name,
             dateCreated: new Date(),
-            owner: request.authenticationContext.principal.id,
+            owner: ownerId,
             curve: "secp384r1",
             algorithm: "ec",
             usage: toPrivateKeyUsageManifest(usage),
-            pemFilePath: keyFsPath
+            pemFilePath: keyFsPath,
+            policies: [{
+                id: Uuid.v4(),
+                dateCreated: new Date(),
+                effect: "allow",
+                actions: "*",
+                principals: [
+                    { "service-principal": ownerId }
+                ],
+                name: "allow-owner"
+            } as IResourcePolicyManifest]
         }
 
         // create key.pem
         await WGOpenssl.ecparam({
             out: keyFsPath
         });
+
+        dirPath.path("manifest.json")
+            .ensureDirExists()
+            .saveJsonConfig(manifest);
 
         return manifest;
     }

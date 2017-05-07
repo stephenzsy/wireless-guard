@@ -1,5 +1,4 @@
 import { IPrincipal } from "../principals/interfaces";
-import { IPolicy } from "../policies/interfaces";
 
 export interface IRequestAuthenticationContext {
     /**

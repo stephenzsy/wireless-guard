@@ -1,42 +1,32 @@
 import { Uuid } from "../common/uuid";
-import { BasePolicy } from "./base-policy";
-import { IPolicyManifest, IPolicy } from "./interfaces";
+import { ResourcePolicy, Policy } from "./base-policy";
+import { IPolicyManifest, IPolicy, IResourcePolicy, IResourcePolicyManifest } from "./interfaces";
 import {
-    matchAllPolicyMatcher,
     MatchAllManifest,
-    InverseMatcher,
-    IInverseMatcherManifest
 } from "./matchers";
-import { matchAllSerivicePrincipalsMatcher, MatchAllServicePrincipalsManifest } from "../principals/service-principal";
+import { IPolicyPrincipalsMatcherManifest } from "../principals/principal-matcher";
 
-const denyAllPolicyManifest: IPolicyManifest<MatchAllManifest, MatchAllManifest, MatchAllManifest> = {
+const denyAllPolicyManifest: IPolicyManifest = {
     id: Uuid.v4(),
     name: "deny-all",
-    principals: "*",
     actions: "*",
-    resources: "*",
     effect: "deny",
     dateCreated: new Date()
 };
 
-export const denyAllPolicy: IPolicy = new BasePolicy(denyAllPolicyManifest,
-    matchAllPolicyMatcher,
-    matchAllPolicyMatcher,
-    matchAllPolicyMatcher);
+export const denyAllPolicy: IPolicy = new Policy(denyAllPolicyManifest);
 
-const requireServicePrincipalPolicyManifest: IPolicyManifest<IInverseMatcherManifest<MatchAllServicePrincipalsManifest>, MatchAllManifest, MatchAllManifest> = {
+const requireServicePrincipalResourcePolicyManifest: IResourcePolicyManifest = {
     id: Uuid.v4(),
     name: "require-service-principal",
     principals: {
-        not: "service-principal:*"
+        not: {
+            "service-principal": "*"
+        } as IPolicyPrincipalsMatcherManifest
     },
     actions: "*",
-    resources: "*",
     effect: "deny",
     dateCreated: new Date()
 };
 
-export const requireServicePrincipalPolicy: IPolicy = new BasePolicy(requireServicePrincipalPolicyManifest,
-    new InverseMatcher(matchAllSerivicePrincipalsMatcher),
-    matchAllPolicyMatcher,
-    matchAllPolicyMatcher);
+export const requireServicePrincipalResourePolicy: IResourcePolicy = new ResourcePolicy(requireServicePrincipalResourcePolicyManifest);

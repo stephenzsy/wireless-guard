@@ -5,3 +5,7 @@ declare interface IDictionaryStringTo<T> {
 declare interface StringMap<T> {
     [key: string]: T;
 }
+
+declare interface NumberMap<T> {
+    [key: number]: T;
+}

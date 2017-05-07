@@ -1,25 +1,26 @@
 import { IResource } from "../common/resource";
 import { BaseResource } from "../common/base-resource";
 import { IPrincipal } from "../principals/interfaces";
+import { createMatcher } from "./matchers";
+import { createPolicyPrincipalsMatcher } from "../principals/principal-matcher";
 import {
     IPolicy,
+    IResourcePolicy,
+    IPrincipalPolicy,
     PolicyEffect,
     IPolicyManifest,
+    IResourcePolicyManifest,
+    IPrincipalPolicyManifest,
     IPolicyPrincipalsMatcher,
     IPolicyActionsMatcher,
     IPolicyResourcesMatcher
 } from "./interfaces";
 
-export class BasePolicy<P extends IPrincipal, A> extends BaseResource implements IPolicy<P, A> {
-    private readonly _principals: IPolicyPrincipalsMatcher<P, any>;
-    private readonly _actions: IPolicyActionsMatcher<A, any>;
-    private readonly _resources: IPolicyResourcesMatcher<any>;
+export class Policy<A extends string = string> extends BaseResource implements IPolicy<A> {
+    private readonly _actions: IPolicyActionsMatcher<A>;
     private readonly _effect: PolicyEffect;
 
-    constructor(manifest: IPolicyManifest<any, any, any>,
-        principals: IPolicyPrincipalsMatcher<P, any>,
-        actions: IPolicyActionsMatcher<A, any>,
-        resources: IPolicyResourcesMatcher<any>) {
+    constructor(manifest: IPolicyManifest) {
         super(manifest);
         switch (manifest.effect) {
             case "deny":
@@ -29,21 +30,11 @@ export class BasePolicy<P extends IPrincipal, A> extends BaseResource implements
                 this._effect = PolicyEffect.allow;
                 break;
         }
-        this._principals = principals;
-        this._actions = actions;
-        this._resources = resources;
+        this._actions = createMatcher(manifest.actions);
     }
 
-    public get principals(): IPolicyPrincipalsMatcher<P, any> {
-        return this._principals;
-    }
-
-    public get actions(): IPolicyActionsMatcher<A, any> {
+    public get actions(): IPolicyActionsMatcher<A> {
         return this._actions;
-    }
-
-    public get resources(): IPolicyResourcesMatcher<any> {
-        return this._resources;
     }
 
     public get effect(): PolicyEffect {
@@ -52,5 +43,31 @@ export class BasePolicy<P extends IPrincipal, A> extends BaseResource implements
 
     public get identifier(): string {
         return "policy:" + this.id;
+    }
+}
+
+export class ResourcePolicy<P extends IPrincipal = IPrincipal, A extends string = string> extends Policy<A> implements IResourcePolicy<P, A> {
+    private readonly _principals: IPolicyPrincipalsMatcher<P>;
+
+    constructor(manifest: IResourcePolicyManifest) {
+        super(manifest);
+        this._principals = createPolicyPrincipalsMatcher(manifest.principals);
+    }
+
+    public get principals(): IPolicyPrincipalsMatcher<P> {
+        return this._principals;
+    }
+}
+
+export class PrincipalPolicy<A extends string = string> extends Policy<A> implements IPrincipalPolicy<A> {
+    private readonly _resources: IPolicyResourcesMatcher;
+
+    constructor(manifest: IPrincipalPolicyManifest) {
+        super(manifest);
+        this._resources = createMatcher(manifest.resources);
+    }
+
+    public get resources(): IPolicyResourcesMatcher {
+        return this._resources;
     }
 }
