@@ -47,16 +47,17 @@ class ExtendedAppConfig extends AppConfig implements IExtendedAppConfig {
 
 var appConfig: AppConfig;
 
-export function initAppConfig(path: string): IAppConfig {
+export function initAppConfig(configPath: ConfigPath): IAppConfig {
     if (!appConfig) {
-        appConfig = new AppConfig(new ConfigPath(path));
+        appConfig = new AppConfig(configPath);
     }
     return appConfig;
 }
 
-export function initExtendedAppConfig(path: string): IExtendedAppConfig {
+export function initExtendedAppConfig(configPath: ConfigPath): IExtendedAppConfig {
     if (!appConfig) {
-        appConfig = new ExtendedAppConfig(new ConfigPath(path));
+        appConfig = new ExtendedAppConfig(configPath);
+        return appConfig as ExtendedAppConfig;
     } else if (appConfig instanceof ExtendedAppConfig) {
         return appConfig;
     }

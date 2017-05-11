@@ -25,7 +25,9 @@
   },
   "typings": "dist/typings/index.d.ts",
   "dependencies": {
-    "fs-extra": "^0.30.0",
+    "@types/fs-extra": "^3.0.0",
+    "@types/node": "^7.0.18",
+    "fs-extra": "^3.0.1",
     "moment": "^2.18.1",
     "winston": "^2.3.1",
     "wireless-guard-openssl": "^0.0.1"

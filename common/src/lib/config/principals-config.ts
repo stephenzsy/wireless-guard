@@ -7,7 +7,7 @@ import { IServicePrincipal, ServicePrincipal, IServicePrincipalManifest } from "
 
 export class PrincipalsConfig {
     protected configPath: ConfigPath;
-    protected store: PrincipalsStore;
+    protected store: PrincipalsStore = new PrincipalsStore();
     protected wellKnownServicePrincipals: StringMap<IServicePrincipal> = {};
 
     constructor(configPath: ConfigPath) {

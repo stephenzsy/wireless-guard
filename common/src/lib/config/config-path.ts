@@ -5,9 +5,16 @@ import * as fse from "fs-extra";
 export class ConfigPath {
     private _fsPath: string;
     constructor(joinedPath: string) {
+        // temporary check joinedPath is not null for compat reason
+        if (joinedPath && !path.isAbsolute(joinedPath)) {
+            joinedPath = path.join(__dirname, joinedPath);
+        }
         this._fsPath = joinedPath;
     }
 
+    /**
+     * absolute path of this cofig path
+     */
     public get fsPath(): string {
         return this._fsPath;
     }

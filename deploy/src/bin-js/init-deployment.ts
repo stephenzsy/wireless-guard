@@ -75,7 +75,7 @@ class Command extends BaseCommand<IOpts> {
         }
 
         // initialize service principal
-        let appConfig = new Config.ExtendedAppConfig(configPath);
+        let appConfig = Config.initExtendedAppConfig(configPath);
         let servicePrincipal = appConfig.principals.getWellKnownServicePrincipal<WellKnownServiceIdentifier>("deploy", true);
         if (servicePrincipal) {
             console.log("Loaded service principal: " + servicePrincipal.id);

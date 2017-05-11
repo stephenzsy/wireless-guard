@@ -44,13 +44,13 @@ function toPrivateKeyUsageManifest(usage: PrivateKeyUsage): PrivateKeyUsageManif
     }
 }
 
-interface IAsymmetricPrivateKeyManifest extends IMaterialManifest {
+export interface IAsymmetricPrivateKeyManifest extends IMaterialManifest {
     algorithm: "ec" | "rsa";
     usage: PrivateKeyUsageManifest;
     pemFilePath: string;
 }
 
-interface IEcPrivateKeyManifest extends IAsymmetricPrivateKeyManifest {
+export interface IEcPrivateKeyManifest extends IAsymmetricPrivateKeyManifest {
     curve: "secp384r1";
 }
 
@@ -99,15 +99,16 @@ namespace Authorization {
         }
     }
 
-    export async function newEcPrivateKeyManifestAsync(request: IRequest, name: string, usage: PrivateKeyUsage): Promise<IEcPrivateKeyManifest> {
+    export async function newEcPrivateKeyManifestAsync(request: IRequest, usage: PrivateKeyUsage, wellKnownName?: string): Promise<IEcPrivateKeyManifest> {
         authorizeCreatePrivateKeyRequest(request, usage);
 
         let id: string = Uuid.v4();
-        let dirPath = getAppConfig().materials.getMaterialConfigPath(id);
+        let dirPath = getAppConfig().materials.getMaterialConfigPath(wellKnownName ? wellKnownName : id);
         let keyFsPath: string = dirPath
             .ensureDirExists()
             .path("key.pem").fsPath;
         let ownerId: string = request.authenticationContext.principal.id;
+        let name = wellKnownName ? wellKnownName : `Private key (${id})`
 
         let manifest: IEcPrivateKeyManifest = {
             id: id,
@@ -142,3 +143,6 @@ namespace Authorization {
         return manifest;
     }
 }
+
+export const newEcPrivateKeyManifestAsync: (request: IRequest, usage: PrivateKeyUsage, wellKnownName?: string) => Promise<IEcPrivateKeyManifest>
+    = Authorization.newEcPrivateKeyManifestAsync;

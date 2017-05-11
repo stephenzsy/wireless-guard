@@ -7,14 +7,14 @@ export abstract class BasePrincipal extends BaseResource implements IPrincipal {
     constructor(manifest: IPrincipalManifest) {
         super(manifest);
         switch (manifest.type) {
+            case "service":
+                this._type = PrincipalType.service;
+                break;
             case "user":
                 this._type = PrincipalType.user;
                 break;
             case "group":
                 this._type = PrincipalType.group;
-                break;
-            case "service":
-                this._type = PrincipalType.service;
                 break;
         }
     }
